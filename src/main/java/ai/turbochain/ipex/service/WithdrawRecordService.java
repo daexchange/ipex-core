@@ -28,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -145,7 +146,7 @@ public class WithdrawRecordService extends BaseService {
     }
 
     /**
-     * 提现成功处理
+     * 提现成功处理  
      *
      * @param withdrawId
      * @param txid
@@ -158,7 +159,9 @@ public class WithdrawRecordService extends BaseService {
             record.setStatus(WithdrawStatus.SUCCESS);
             MemberWallet wallet = walletService.findByCoinUnitAndMemberId(record.getCoin().getUnit(), record.getMemberId());
             if (wallet != null) {
-                wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
+                //更改数据库用户冻结钱包余额
+            	//wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
+                walletService.decreaseFrozen(wallet.getId(),record.getTotalAmount());
                 MemberTransaction transaction = new MemberTransaction();
                 transaction.setAmount(record.getTotalAmount());
                 transaction.setSymbol(wallet.getCoin().getUnit());
