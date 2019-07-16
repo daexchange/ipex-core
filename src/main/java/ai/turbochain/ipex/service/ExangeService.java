@@ -10,7 +10,7 @@ import ai.turbochain.ipex.dao.MemberWalletDao;
 import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.Member;
 import ai.turbochain.ipex.entity.MemberWallet;
-import ai.turbochain.ipex.entity.WalletTransferOtherRecord;
+import ai.turbochain.ipex.entity.TransferOtherRecord;
 import ai.turbochain.ipex.service.Base.BaseService;
 import ai.turbochain.ipex.util.MessageResult;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class ExangeService extends BaseService {
         	result = memberWalletDao.transferIncreaseBalance(memberWalletTo.getId(), memberIdTo, amount, memberWalletTo.getBalance());
         	
         	if (result > 0) {
-        		WalletTransferOtherRecord walletTransferRecord = new WalletTransferOtherRecord();
+        		TransferOtherRecord walletTransferRecord = new TransferOtherRecord();
                  
         		Coin coin = new Coin();
         		coin.setName(coinId);

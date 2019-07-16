@@ -87,7 +87,7 @@ public class Member {
     private MemberLevelEnum memberLevel;
 
     @Enumerated(EnumType.ORDINAL)
-    private CommonStatus status = CommonStatus.NORMAL;
+    private CommonStatus status = CommonStatus.ILLEGAL;
 
     @Excel(name = "注册时间", orderNum = "1", width = 20)
     @CreationTimestamp

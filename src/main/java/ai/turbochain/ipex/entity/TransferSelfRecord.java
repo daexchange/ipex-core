@@ -20,27 +20,17 @@ import lombok.Data;
 
 @Entity
 @Data
-public class WalletTransferOtherRecord {
+public class TransferSelfRecord {
     @Excel(name = "交易记录编号", orderNum = "1", width = 25)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    @Excel(name = "币币from账户ID", orderNum = "2", width = 25)
-    private Long walletIdFrom;
-    @Excel(name = "币币to账户ID", orderNum = "2", width = 25)
-    private Long walletIdTo;
+    @Excel(name = "法币账户ID", orderNum = "2", width = 25)
+    private Long legalcurrencyId;
+    @Excel(name = "币币账户ID", orderNum = "2", width = 25)
+    private Long walletId;
     @Excel(name = "交易人员ID", orderNum = "2", width = 25)
-    private Long memberIdFrom;
-    //@ManyToOne
-    //@JoinColumn(name = "member_id_from")
-   // private Member memberFrom;
-    
-    @Excel(name = "交易人员ID", orderNum = "2", width = 25)
-    //private Long memberIdTo;
-    @ManyToOne
-    @JoinColumn(name = "member_id_to")
-    private Member memberTo;
-    
+    private Long memberId;
     @Excel(name = "币种ID", orderNum = "2", width = 25)
     @ManyToOne
     @JoinColumn(name = "coin_id")
@@ -65,6 +55,12 @@ public class WalletTransferOtherRecord {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
+    /**
+     * 交易类型
+     */
+    @Excel(name = "交易类型", orderNum = "5", width = 25)
+    private Integer type;
+    
     /**
      * 交易类型
      */

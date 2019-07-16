@@ -31,7 +31,7 @@ import ai.turbochain.ipex.entity.Order;
 import ai.turbochain.ipex.entity.OtcCoin;
 import ai.turbochain.ipex.entity.QMember;
 import ai.turbochain.ipex.entity.QMemberWallet;
-import ai.turbochain.ipex.entity.WalletTransferRecord;
+import ai.turbochain.ipex.entity.TransferSelfRecord;
 import ai.turbochain.ipex.es.ESUtils;
 import ai.turbochain.ipex.exception.InformationExpiredException;
 import ai.turbochain.ipex.service.Base.BaseService;
@@ -47,7 +47,7 @@ public class MemberLegalCurrencyWalletService extends BaseService {
     @Autowired
     private MemberWalletDao memberWalletDao;
     @Autowired
-    private WalletTransferRecordService walletTransferRecordService;
+    private TransferSelfRecordService transferSelfRecordService;
     @Autowired
     private CoinDao coinDao;
     @Autowired
@@ -427,7 +427,7 @@ public class MemberLegalCurrencyWalletService extends BaseService {
     	    result =  memberWalletDao.transferDecreaseBalance(memberWallet.getId(), memberId, amount, memberWallet.getBalance());
            
             if (result > 0) {
-                 WalletTransferRecord walletTransferRecord = new WalletTransferRecord();
+                 TransferSelfRecord walletTransferRecord = new TransferSelfRecord();
                  
                  Coin coin = new Coin();
          		coin.setName(coinId);
@@ -441,7 +441,7 @@ public class MemberLegalCurrencyWalletService extends BaseService {
                  walletTransferRecord.setArrivedAmount(amount);
                  walletTransferRecord.setFee(BigDecimal.ZERO);
                  
-                 walletTransferRecordService.save(walletTransferRecord);
+                 transferSelfRecordService.save(walletTransferRecord);
                  
                  //增加记录
                  return new MessageResult(0, "success");
@@ -476,7 +476,7 @@ public class MemberLegalCurrencyWalletService extends BaseService {
         	result = memberWalletDao.transferIncreaseBalance(memberWallet.getId(), memberId, amount, memberWallet.getBalance());
         	
         	if (result > 0) {
-        		WalletTransferRecord walletTransferRecord = new WalletTransferRecord();
+        		TransferSelfRecord walletTransferRecord = new TransferSelfRecord();
                  
         		Coin coin = new Coin();
         		coin.setName(coinId);
@@ -492,7 +492,7 @@ public class MemberLegalCurrencyWalletService extends BaseService {
                  walletTransferRecord.setFee(BigDecimal.ZERO);
                  
                //增加记录
-                 walletTransferRecordService.save(walletTransferRecord);
+                 transferSelfRecordService.save(walletTransferRecord);
                  
                  return new MessageResult(0, "success");
         	} else {
