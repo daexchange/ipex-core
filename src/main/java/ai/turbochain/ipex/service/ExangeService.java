@@ -1,5 +1,7 @@
 package ai.turbochain.ipex.service;
 
+import static ai.turbochain.ipex.util.BigDecimalUtils.sub;
+
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,8 @@ public class ExangeService extends BaseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public MessageResult transferToOther(MemberWallet memberWalletFrom,
-    		String coinId,Long memberIdFrom, 
-    		Long memberIdTo, 
-    		BigDecimal amount) throws Exception {
+    		String coinId,Long memberIdFrom, Long memberIdTo, 
+    		BigDecimal amount,BigDecimal fee) throws Exception {
     	
     	MemberWallet memberWalletTo = memberWalletDao.getMemberWalletByCoinAndMemberId(coinId, memberIdTo);
  
@@ -43,9 +44,9 @@ public class ExangeService extends BaseService {
         int result = memberWalletDao.transferDecreaseBalance(memberWalletFrom.getId(),memberIdFrom, amount,memberWalletFrom.getBalance());
        
         if (result > 0) {
-        	 
+        	BigDecimal arrivedAmount = sub(amount, fee);
         	// 他人币币账户增加
-        	result = memberWalletDao.transferIncreaseBalance(memberWalletTo.getId(), memberIdTo, amount, memberWalletTo.getBalance());
+        	result = memberWalletDao.transferIncreaseBalance(memberWalletTo.getId(), memberIdTo, arrivedAmount, memberWalletTo.getBalance());
         	
         	if (result > 0) {
         		TransferOtherRecord walletTransferRecord = new TransferOtherRecord();
@@ -61,15 +62,14 @@ public class ExangeService extends BaseService {
         		walletTransferRecord.setWalletIdFrom(memberWalletFrom.getId());
         		walletTransferRecord.setWalletIdTo(memberWalletTo.getId());
         		walletTransferRecord.setTotalAmount(amount);
-                 walletTransferRecord.setStatus(1);
-                 walletTransferRecord.setTotalAmount(amount);
-                 walletTransferRecord.setArrivedAmount(amount);
-                 walletTransferRecord.setFee(BigDecimal.ZERO);
+        		walletTransferRecord.setFee(fee);
+        		walletTransferRecord.setArrivedAmount(arrivedAmount);
+                walletTransferRecord.setStatus(1);
                  
-               //增加记录
-                 walletTransferOtherRecordService.save(walletTransferRecord);
+                //增加记录
+                walletTransferOtherRecordService.save(walletTransferRecord);
                  
-                 return new MessageResult(0, "success");
+               	return new MessageResult(0, "success");
         	} else {
         		throw new Exception("划转失败！");
         	}
