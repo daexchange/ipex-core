@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import static ai.turbochain.ipex.constant.BooleanEnum.IS_FALSE;
 import static ai.turbochain.ipex.constant.BooleanEnum.IS_TRUE;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -197,5 +199,8 @@ public class CoinService extends BaseService {
         //设置传入币为平台币
         coin.setIsPlatformCoin(IS_TRUE);
     }
-
+    
+    public Set<String> findAllUnit(@Param("status") CommonStatus status) {
+    	return coinDao.findAllUnit(status);
+    }
 }

@@ -1,5 +1,9 @@
 package ai.turbochain.ipex.dao;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -11,8 +15,6 @@ import ai.turbochain.ipex.constant.BooleanEnum;
 import ai.turbochain.ipex.constant.CommonStatus;
 import ai.turbochain.ipex.dto.CoinDTO;
 import ai.turbochain.ipex.entity.Coin;
-
-import java.util.List;
 
 /**
  * @author GS
@@ -47,4 +49,7 @@ public interface CoinDao extends JpaRepository<Coin, String>, JpaSpecificationEx
     List<String> findAllRpcUnit();
 
     List<Coin> findAllByIsPlatformCoin(BooleanEnum isPlatformCoin);
+
+    @Query("select a.unit from Coin a where a.status = :status order by a.sort")
+    Set<String> findAllUnit(@Param("status") CommonStatus status);
 }

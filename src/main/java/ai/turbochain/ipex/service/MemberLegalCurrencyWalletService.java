@@ -124,8 +124,8 @@ public class MemberLegalCurrencyWalletService extends BaseService {
      * @param amount
      * @return
      */
-    public MessageResult freezeBalance(MemberWallet memberWallet, BigDecimal amount) {
-        int ret = memberLegalCurrencyWalletDao.freezeBalance(memberWallet.getId(), amount);
+    public MessageResult freezeBalance(MemberLegalCurrencyWallet memberLegalCurrencyWallet, BigDecimal amount) {
+        int ret = memberLegalCurrencyWalletDao.freezeBalance(memberLegalCurrencyWallet.getId(), amount);
         if (ret > 0) {
             return MessageResult.success();
         } else {
@@ -140,8 +140,8 @@ public class MemberLegalCurrencyWalletService extends BaseService {
      * @param amount
      * @return
      */
-    public MessageResult thawBalance(MemberWallet memberWallet, BigDecimal amount) {
-        int ret = memberLegalCurrencyWalletDao.thawBalance(memberWallet.getId(), amount);
+    public MessageResult thawBalance(MemberLegalCurrencyWallet memberLegalCurrencyWallet, BigDecimal amount) {
+        int ret = memberLegalCurrencyWalletDao.thawBalance(memberLegalCurrencyWallet.getId(), amount);
         if (ret > 0) {
             return MessageResult.success();
         } else {
