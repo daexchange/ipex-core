@@ -1,5 +1,6 @@
 package ai.turbochain.ipex.dao;
 
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ import ai.turbochain.ipex.entity.MemberWallet;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import javax.persistence.LockModeType;
 
 public interface MemberWalletDao extends BaseDao<MemberWallet> {
 
@@ -133,6 +136,11 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
     @Query(value = "select * from member_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
     MemberWallet getMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
 
+    /**@Lock 作用的for update作用一样，将此行数据进行加锁，当整个方法将事务提交后，才会解锁*/
+    @Lock(value = LockModeType.PESSIMISTIC_READ)
+    //@Query(value = "select * from member_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
+    @Query(value = "select o from MemberWallet o where o.coin.name= :coinId and o.memberId=:memberId ")
+    MemberWallet getLockMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
 
     @Transactional
     @Modifying

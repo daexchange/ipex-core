@@ -1,7 +1,9 @@
 package ai.turbochain.ipex.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,10 +37,11 @@ public class MemberLevelFee {
 	@NotNull(message = "默认不得为null")
 	private Long memberLevelId;
 	/**
-	 * 费率
+	 * 手续费
 	 */
-	@NotNull(message = "默认不得为null")
-	private Double rate;
+    @Column(columnDefinition = "decimal(18,8) default 0 comment '手续费'")
+    private BigDecimal fee;
+    
 	/**
 	 * 交易类型
 	 */

@@ -3,6 +3,9 @@ package ai.turbochain.ipex.dao;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.persistence.LockModeType;
+
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -133,6 +136,10 @@ public interface MemberLegalCurrencyWalletDao extends BaseDao<MemberLegalCurrenc
     @Query(value = "select * from member_legal_currency_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
     MemberLegalCurrencyWallet getMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
 
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
+    //@Query(value = "select * from member_legal_currency_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
+    @Query(value = "select o from MemberLegalCurrencyWallet o where o.coin.name= :coinId and o.memberId=:memberId ")
+    MemberLegalCurrencyWallet getLockMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
 
     @Transactional
     @Modifying

@@ -36,7 +36,6 @@ public class TransferOtherRecord {
    // private Member memberFrom;
     
     @Excel(name = "交易人员ID", orderNum = "2", width = 25)
-    //private Long memberIdTo;
     @ManyToOne
     @JoinColumn(name = "member_id_to")
     private Member memberTo;
