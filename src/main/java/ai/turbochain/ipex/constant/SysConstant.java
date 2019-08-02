@@ -44,6 +44,8 @@ public class SysConstant {
 	public static final String PHONE_CHANGE_CODE_PREFIX = "PHONE_CHANGE_CODE_";
 
 	public static final String EMAIL_EXANGE_TRANSFER_PREFIX = "EMAIL_EXANGE_TRANSFER_CODE_";
+	
+	public static final String EMAIL_WITHDRAW_CODE_PREFIX = "EMAIL_WITHDRAW_CODE_";
 
 	public static final String EMAIL_REG_CODE_PREFIX = "EMAIL_REG_CODE_";
 
