@@ -35,6 +35,10 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
     @Autowired
     private CoinDao coinDao;
 
+    public MemberLegalCurrencyWallet save(MemberLegalCurrencyWallet bean) {
+        return memberLegalCurrencyWalletDao.saveAndFlush(bean);
+    }
+    
     /**
      * 获取钱包
      *
