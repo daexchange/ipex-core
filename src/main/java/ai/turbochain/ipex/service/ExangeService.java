@@ -78,6 +78,7 @@ public class ExangeService extends BaseService {
             		transferOtherRecord.setFee(fee);
             		transferOtherRecord.setArrivedAmount(arrivedAmount);
             		transferOtherRecord.setStatus(1);
+            		transferOtherRecord.setType(1);
                      
                     //增加记录
                     walletTransferOtherRecordService.save(transferOtherRecord);

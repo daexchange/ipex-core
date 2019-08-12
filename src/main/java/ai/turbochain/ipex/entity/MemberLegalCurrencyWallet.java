@@ -32,6 +32,7 @@ public class MemberLegalCurrencyWallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+    
     private Long memberId;
 
     @ManyToOne
