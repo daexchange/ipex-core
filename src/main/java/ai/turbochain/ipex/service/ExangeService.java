@@ -3,18 +3,22 @@ package ai.turbochain.ipex.service;
 import static ai.turbochain.ipex.util.BigDecimalUtils.sub;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import ai.turbochain.ipex.constant.TransactionType;
 import ai.turbochain.ipex.dao.MemberWalletDao;
 import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.Member;
+import ai.turbochain.ipex.entity.MemberTransaction;
 import ai.turbochain.ipex.entity.MemberWallet;
 import ai.turbochain.ipex.entity.TransferOtherRecord;
 import ai.turbochain.ipex.service.Base.BaseService;
+import ai.turbochain.ipex.util.BigDecimalUtils;
 import ai.turbochain.ipex.util.MessageResult;
 import lombok.extern.slf4j.Slf4j;
 @Service
@@ -28,7 +32,9 @@ public class ExangeService extends BaseService {
     private MemberWalletDao memberWalletDao;
 	@Autowired
     private WalletTransferOtherRecordService walletTransferOtherRecordService;
-	
+    @Autowired
+    private MemberTransactionService memberTransactionService;
+    
 	
 	/**
      * 币币资金转账到他人账户
@@ -85,6 +91,20 @@ public class ExangeService extends BaseService {
                     //增加记录
                     walletTransferOtherRecordService.save(transferOtherRecord);
                 	
+                    MemberTransaction memberTransaction = new MemberTransaction();
+                    
+                    memberTransaction.setAddress(memberWalletFrom.getAddress());
+                    memberTransaction.setAmount(BigDecimalUtils.add(fee, amount));
+                    memberTransaction.setMemberId(memberIdFrom);
+                    memberTransaction.setSymbol(coin.getName());
+                    memberTransaction.setCreateTime(new Date());
+                    memberTransaction.setType(TransactionType.TRANSFER_ACCOUNTS);
+                    memberTransaction.setFee(fee);
+                    memberTransaction.setRealFee(fee.toString());
+                    memberTransaction.setDiscountFee("0");
+                    
+                    memberTransaction=  memberTransactionService.save(memberTransaction);
+                    
                     return new MessageResult(0, "success");
             	} else {
             		throw new Exception("划转失败！");
