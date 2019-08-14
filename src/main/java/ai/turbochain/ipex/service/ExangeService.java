@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ExangeService extends BaseService {
    
 	// 系统会员ID
-	public static final Long system_member_id = 73l;
+	public static final Long system_member_id = 2l;
     
 	@Autowired
     private MemberWalletDao memberWalletDao;
