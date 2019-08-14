@@ -57,10 +57,11 @@ public class ExangeService extends BaseService {
         	result = memberWalletDao.transferIncreaseBalance(memberWalletTo.getId(), memberIdTo, arrivedAmount, memberWalletTo.getBalance());
         	
         	if (result > 0) {
+        		if (fee.compareTo(BigDecimal.ZERO)==1) {
+        			// 手续费划转到系统账户
+                	result = memberWalletDao.transferIncreaseBalance(systemMemberWallet.getId(), systemMemberWallet.getMemberId(), fee, systemMemberWallet.getBalance());
+        		}
         		
-        		// 手续费划转到系统账户
-            	result = memberWalletDao.transferIncreaseBalance(systemMemberWallet.getId(), systemMemberWallet.getMemberId(), fee, systemMemberWallet.getBalance());
-
             	if (result > 0) {
             		TransferOtherRecord transferOtherRecord = new TransferOtherRecord();
                     
