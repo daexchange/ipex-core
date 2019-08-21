@@ -1,18 +1,27 @@
 package ai.turbochain.ipex.entity;
 
-import cn.afterturn.easypoi.excel.annotation.Excel;
-import ai.turbochain.ipex.constant.CommonStatus;
-import ai.turbochain.ipex.constant.SysHelpClassification;
+import java.io.Serializable;
+import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
-import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import ai.turbochain.ipex.constant.CommonStatus;
+import ai.turbochain.ipex.constant.SysHelpClassification;
+import cn.afterturn.easypoi.excel.annotation.Excel;
+import lombok.Data;
 
 /**
  * @author GS
@@ -22,7 +31,7 @@ import java.util.Date;
 @Entity
 @Data
 @Table(name = "sys_help")
-public class SysHelp {
+public class SysHelp implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Excel(name = "编号", orderNum = "1", width = 20)
