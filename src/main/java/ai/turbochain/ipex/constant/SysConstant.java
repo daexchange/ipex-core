@@ -21,6 +21,8 @@ public class SysConstant {
 	 */
 	public static final String DIGITAL_CURRENCY_MARKET_PREFIX = "DIGITAL_CURRENCY_MARKET_";
 
+	public static final String COINS_CNY_RATE = "COINS_CNY_RATE";
+
 	/**
 	 * 验证码
 	 */
