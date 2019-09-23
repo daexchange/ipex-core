@@ -210,4 +210,6 @@ public class Member {
      */
     @Column(name = "sign_in_ability", columnDefinition = "bit default 1", nullable = false)
     private Boolean signInAbility = true;
+    
+    private Integer origin;
 }

@@ -69,5 +69,11 @@ public class TransferOtherRecord {
      */
     @Excel(name = "交易类型", orderNum = "5", width = 25)
     private Integer status;
+    
+    /**
+     * 交易类型
+     */
+    @Excel(name = "交易类型", orderNum = "5", width = 25)
+    private Integer type;
   
 }
