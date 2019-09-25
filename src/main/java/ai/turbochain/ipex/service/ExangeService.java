@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ExangeService extends BaseService {
    
 	// 系统会员ID
-	public static final Long system_member_id = 73l;
+	@Value("${system.member.id}")
+	public Long system_member_id;
     
-	// 系统会员ID
-	public static final Long system_member_id_model_chian = 2l;
 	@Autowired
     private MemberWalletDao memberWalletDao;
 	@Autowired
@@ -118,7 +118,6 @@ public class ExangeService extends BaseService {
     	// 悲观锁 将行数据锁定 select for udpate 所有update方法都需要加锁
     	MemberWallet memberWalletFrom = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdFrom);
     	MemberWallet memberWalletTo = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdTo);
-    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, system_member_id_model_chian);
     	
     	// 打款方币币账户扣减
         int result = memberWalletDao.transferDecreaseBalance(memberWalletFrom.getId(),memberIdFrom, amount,memberWalletFrom.getBalance());
@@ -132,6 +131,8 @@ public class ExangeService extends BaseService {
         	if (result > 0) {
         		
         		if (fee.compareTo(BigDecimal.ZERO)==1) {
+        	    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, system_member_id);
+
         			// 手续费划转到系统账户
                 	result = memberWalletDao.transferIncreaseBalance(systemMemberWallet.getId(), systemMemberWallet.getMemberId(), fee, systemMemberWallet.getBalance());
         		}
