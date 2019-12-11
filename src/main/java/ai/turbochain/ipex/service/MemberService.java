@@ -1,22 +1,8 @@
 package ai.turbochain.ipex.service;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
+import static ai.turbochain.ipex.constant.TransactionType.ACTIVITY_AWARD;
 
-import ai.turbochain.ipex.constant.CertifiedBusinessStatus;
-import ai.turbochain.ipex.constant.CommonStatus;
-import ai.turbochain.ipex.dao.MemberDao;
-import ai.turbochain.ipex.dao.MemberSignRecordDao;
-import ai.turbochain.ipex.dao.MemberTransactionDao;
-import ai.turbochain.ipex.entity.*;
-import ai.turbochain.ipex.exception.AuthenticationException;
-import ai.turbochain.ipex.pagination.Criteria;
-import ai.turbochain.ipex.pagination.PageResult;
-import ai.turbochain.ipex.pagination.Restrictions;
-import ai.turbochain.ipex.service.Base.BaseService;
-import ai.turbochain.ipex.util.BigDecimalUtils;
-import ai.turbochain.ipex.util.Md5;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +13,28 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static ai.turbochain.ipex.constant.TransactionType.ACTIVITY_AWARD;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
-import java.util.List;
+import ai.turbochain.ipex.constant.CertifiedBusinessStatus;
+import ai.turbochain.ipex.constant.CommonStatus;
+import ai.turbochain.ipex.dao.MemberDao;
+import ai.turbochain.ipex.dao.MemberSignRecordDao;
+import ai.turbochain.ipex.dao.MemberTransactionDao;
+import ai.turbochain.ipex.entity.Member;
+import ai.turbochain.ipex.entity.MemberSignRecord;
+import ai.turbochain.ipex.entity.MemberTransaction;
+import ai.turbochain.ipex.entity.MemberWallet;
+import ai.turbochain.ipex.entity.QMember;
+import ai.turbochain.ipex.entity.Sign;
+import ai.turbochain.ipex.exception.AuthenticationException;
+import ai.turbochain.ipex.pagination.Criteria;
+import ai.turbochain.ipex.pagination.PageResult;
+import ai.turbochain.ipex.pagination.Restrictions;
+import ai.turbochain.ipex.service.Base.BaseService;
+import ai.turbochain.ipex.util.BigDecimalUtils;
+import ai.turbochain.ipex.util.Md5;
 
 @Service
 public class MemberService extends BaseService {
@@ -209,5 +214,9 @@ public class MemberService extends BaseService {
      */
     public boolean userPromotionCodeIsExist(String promotion) {
         return memberDao.getAllByPromotionCodeEquals(promotion).size() > 0 ? true : false;
+    }
+    
+    public Member findMemberByMobilePhoneOrEmail(String phone, String email) {
+    	return memberDao.findMemberByMobilePhoneOrEmail(phone, email);
     }
 }

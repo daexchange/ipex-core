@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -19,8 +21,14 @@ import java.util.Date;
 @Entity
 @Data
 @Table
-public class Department {
-    @GeneratedValue(strategy = GenerationType.AUTO)
+public class Department implements Serializable{
+    
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1607878895813961706L;
+	
+	@GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long id;
     @Excel(name = "部门名称", orderNum = "1", width = 20)

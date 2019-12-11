@@ -53,9 +53,11 @@ public class MemberEvent {
      * @param member 持久化对象
      */
     public void onRegisterSuccess(Member member, String promotionCode) throws InterruptedException {
-        JSONObject json = new JSONObject();
+        
+    	JSONObject json = new JSONObject();
         json.put("uid", member.getId());
         kafkaTemplate.send("member-register", json.toJSONString());
+        
         //推广活动
         if (StringUtils.hasText(promotionCode)) {
             Member member1 = memberDao.findMemberByPromotionCode(promotionCode);
