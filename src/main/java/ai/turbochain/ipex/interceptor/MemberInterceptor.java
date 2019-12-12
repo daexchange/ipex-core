@@ -2,12 +2,19 @@ package ai.turbochain.ipex.interceptor;
 
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.osp.blockchain.bean.User;
 
 import ai.turbochain.ipex.constant.SysConstant;
 import ai.turbochain.ipex.entity.Member;
@@ -30,6 +37,9 @@ import java.util.Calendar;
 @Slf4j
 public class MemberInterceptor implements HandlerInterceptor {
 
+	@Autowired
+	private RedisTemplate redisTemplate;
+	
 	/**
 	 * 	处理Session问题
 	 */
@@ -43,8 +53,28 @@ public class MemberInterceptor implements HandlerInterceptor {
         
 //        Member webUser = (Member) session.getAttribute(SysConstant.SESSION_MEMBER_WEB);
 //        if (user != null || webUser != null) {
+      
+        String accessToken = request.getHeader("access_token");
+        accessToken = "11.67d0bc3246ae1c10cb10e0f72715cc3ae524b372.3600.1576142879";
+        if (1==1) {
+        //	return true;
+        }
+
         if (user != null) {
             return true;
+        } else if (StringUtils.isNotBlank(accessToken)) {
+        	log.info("accessToken:{}",accessToken);
+            ValueOperations valueOperations = redisTemplate.opsForValue();
+           
+            Object code = valueOperations.get(accessToken);
+            User hardIdUser = (User) request.getAttribute("user");
+        	
+            if (code!=null&&hardIdUser!=null) {
+            	return true;
+        	}
+            
+            ajaxReturn(response, 4000, "当前登录状态过期，请您重新登录！");
+        	return false;
         } else {
 //        	// API 验证机制    后期添加
 //            String token = request.getHeader("api-auth-token");

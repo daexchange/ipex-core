@@ -35,7 +35,7 @@ public class MemberApplication {
      * 身份证 反面
      */
    // @NotBlank(message = "身份证反面图片不能为空")
-   // private String identityCardImgReverse;
+    private String identityCardImgReverse;
     /**
      * 身份证 手持
      */
@@ -76,4 +76,6 @@ public class MemberApplication {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
+    private Integer cardType;
+    
 }
