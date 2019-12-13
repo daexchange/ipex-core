@@ -1,16 +1,19 @@
 package ai.turbochain.ipex.interceptor;
 
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -19,15 +22,7 @@ import com.osp.blockchain.bean.User;
 import ai.turbochain.ipex.constant.SysConstant;
 import ai.turbochain.ipex.entity.Member;
 import ai.turbochain.ipex.entity.transform.AuthMember;
-import ai.turbochain.ipex.event.MemberEvent;
-import ai.turbochain.ipex.service.MemberService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Calendar;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 	用户验证拦截器
@@ -55,10 +50,7 @@ public class MemberInterceptor implements HandlerInterceptor {
 //        if (user != null || webUser != null) {
       
         String accessToken = request.getHeader("access_token");
-        accessToken = "11.67d0bc3246ae1c10cb10e0f72715cc3ae524b372.3600.1576142879";
-        if (1==1) {
-        //	return true;
-        }
+       // accessToken = "11.7d56b01dad0fb063ec15263e5f5395ea30f0f266.3600.1576157526";
 
         if (user != null) {
             return true;
@@ -66,11 +58,22 @@ public class MemberInterceptor implements HandlerInterceptor {
         	log.info("accessToken:{}",accessToken);
             ValueOperations valueOperations = redisTemplate.opsForValue();
            
-            Object code = valueOperations.get(accessToken);
-            User hardIdUser = (User) request.getAttribute("user");
+           // User s = new User();
+           // s.setId(1);s.setIpexId(115l);
+            //valueOperations.set(accessToken, s);
+            
+            User hardIdUser = (User)valueOperations.get(accessToken);
         	
-            if (code!=null&&hardIdUser!=null) {
-            	return true;
+            if (hardIdUser!=null) {
+            	Long memberId = hardIdUser.getIpexId();
+            	if (memberId!=null) {
+            		Member member = new Member();
+                	
+            		member.setId(memberId);
+            		request.getSession().setAttribute(SysConstant.API_HARD_ID_MEMBER, AuthMember.toAuthMember(member));
+            		
+            		return true;
+            	}
         	}
             
             ajaxReturn(response, 4000, "当前登录状态过期，请您重新登录！");
