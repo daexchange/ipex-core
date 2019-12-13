@@ -143,4 +143,6 @@ public class SysConstant {
 	public static final int USER_ADD_EXCHANGE_ORDER_TIME_LIMIT_EXPIRE_TIME = 20;
 
 	public static final String DATA_COIN_SETTLEMENT_KEY = "COIN_SETTLEMENT";
+
+	public static final String API_HARD_ID_MEMBER = "API_HARD_ID_MEMBER";
 }
