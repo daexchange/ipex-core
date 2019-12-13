@@ -50,7 +50,7 @@ public class MemberInterceptor implements HandlerInterceptor {
 //        if (user != null || webUser != null) {
       
         String accessToken = request.getHeader("access_token");
-       // accessToken = "11.7d56b01dad0fb063ec15263e5f5395ea30f0f266.3600.1576157526";
+        accessToken = "11.7d56b01dad0fb063ec15263e5f5395ea30f0f266.3600.1576157526";
 
         if (user != null) {
             return true;
@@ -58,9 +58,9 @@ public class MemberInterceptor implements HandlerInterceptor {
         	log.info("accessToken:{}",accessToken);
             ValueOperations valueOperations = redisTemplate.opsForValue();
            
-           // User s = new User();
-           // s.setId(1);s.setIpexId(115l);
-            //valueOperations.set(accessToken, s);
+          /** */ User s = new User();
+            s.setId(1);s.setIpexId(112l);
+            valueOperations.set(accessToken, s);
             
             User hardIdUser = (User)valueOperations.get(accessToken);
         	
