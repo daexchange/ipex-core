@@ -173,5 +173,5 @@ public class Advertise implements Serializable {
     private String limitMoney;
     private String username;
     private String coinUnit;
-
+    private Integer origin;
 }
