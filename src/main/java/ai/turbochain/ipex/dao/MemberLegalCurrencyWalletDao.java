@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import ai.turbochain.ipex.dao.base.BaseDao;
-import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
+import ai.turbochain.ipex.entity.OtcCoin;
 
 public interface MemberLegalCurrencyWalletDao extends BaseDao<MemberLegalCurrencyWallet> {
 
@@ -72,14 +72,11 @@ public interface MemberLegalCurrencyWalletDao extends BaseDao<MemberLegalCurrenc
     @Query("update MemberLegalCurrencyWallet wallet set wallet.frozenBalance=wallet.frozenBalance - :amount where wallet.id = :walletId and wallet.frozenBalance >= :amount")
     int decreaseFrozen(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
 
-
-   // MemberLegalCurrencyWallet findByCoinAndAddress(Coin coin, String address);
-
-    MemberLegalCurrencyWallet findByCoinAndMemberId(Coin coin, Long memberId);
+    MemberLegalCurrencyWallet findByOtcCoinAndMemberId(OtcCoin otcCoin, Long memberId);
 
     List<MemberLegalCurrencyWallet> findAllByMemberId(Long memberId);
 
-    List<MemberLegalCurrencyWallet> findAllByCoin(Coin coin);
+    List<MemberLegalCurrencyWallet> findAllByOtcCoin(OtcCoin otcCoin);
 
     @Query(value="select sum(a.balance)+sum(a.frozen_balance) as allBalance from member_legal_currency_wallet a where a.coin_id = :coinName",nativeQuery = true)
     BigDecimal getWalletAllBalance(@Param("coinName")String coinName);
@@ -138,8 +135,8 @@ public interface MemberLegalCurrencyWalletDao extends BaseDao<MemberLegalCurrenc
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     //@Query(value = "select * from member_legal_currency_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
-    @Query(value = "select o from MemberLegalCurrencyWallet o where o.coin.name= :coinId and o.memberId=:memberId ")
-    MemberLegalCurrencyWallet getLockMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
+    @Query(value = "select o from MemberLegalCurrencyWallet o where o.otcCoin.id= :coinId and o.memberId=:memberId ")
+    MemberLegalCurrencyWallet getLockMemberWalletByOtcCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
 
     @Transactional
     @Modifying

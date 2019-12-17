@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ai.turbochain.ipex.dao.CoinDao;
 import ai.turbochain.ipex.dao.MemberLegalCurrencyWalletDao;
 import ai.turbochain.ipex.dao.MemberWalletDao;
+import ai.turbochain.ipex.dao.OtcCoinDao;
 import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
 import ai.turbochain.ipex.entity.MemberWallet;
@@ -33,7 +33,7 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
     @Autowired
     private TransferSelfRecordService transferSelfRecordService;
     @Autowired
-    private CoinDao coinDao;
+    private OtcCoinDao otcCoinDao;
 
     public MemberLegalCurrencyWallet save(MemberLegalCurrencyWallet bean) {
         return memberLegalCurrencyWalletDao.saveAndFlush(bean);
@@ -46,18 +46,17 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
      * @param memberId
      * @return
      */
-    public MemberLegalCurrencyWallet findByOtcCoinAndMemberId(OtcCoin coin, long memberId) {
-        Coin coin1 = coinDao.findByUnit(coin.getUnit());
-        return memberLegalCurrencyWalletDao.findByCoinAndMemberId(coin1, memberId);
+    public MemberLegalCurrencyWallet findByOtcCoinAndMemberId(OtcCoin otcCoin, long memberId) {
+        return memberLegalCurrencyWalletDao.findByOtcCoinAndMemberId(otcCoin, memberId);
     }
 
-    public MemberLegalCurrencyWallet findByCoinUnitAndMemberId(String coinUnit, Long memberId) {
-        Coin coin = coinDao.findByUnit(coinUnit);
-        return memberLegalCurrencyWalletDao.findByCoinAndMemberId(coin, memberId);
+    public MemberLegalCurrencyWallet findByOtcCoinUnitAndMemberId(String coinUnit, Long memberId) {
+    	OtcCoin coin = otcCoinDao.findOtcCoinByUnit(coinUnit);
+        return memberLegalCurrencyWalletDao.findByOtcCoinAndMemberId(coin, memberId);
     }
 
-    public MemberLegalCurrencyWallet findByCoinAndMemberId(Coin coin, Long memberId) {
-        return memberLegalCurrencyWalletDao.findByCoinAndMemberId(coin, memberId);
+    public MemberLegalCurrencyWallet findByOtcCoinAndMemberId(OtcCoin otcCoin, Long memberId) {
+        return memberLegalCurrencyWalletDao.findByOtcCoinAndMemberId(otcCoin, memberId);
     }
 
     /**
@@ -170,7 +169,7 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
             return new MessageResult(500, "可划转余额不足");
         }
     	
-		MemberLegalCurrencyWallet memberLegalCurrencyWallet =  memberLegalCurrencyWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberId);
+		MemberLegalCurrencyWallet memberLegalCurrencyWallet =  memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinAndMemberId(coinId, memberId);
 
     	if (memberLegalCurrencyWallet == null) {
             return new MessageResult(500, "wallet cannot be null");
@@ -220,7 +219,7 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public MessageResult transferDecreaseBalance(String coinId,Long memberId, BigDecimal amount) throws Exception {
     	
-    	MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberId);
+    	MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinAndMemberId(coinId, memberId);
     	
     	if (memberLegalCurrencyWallet.getBalance().compareTo(amount) < 0) {
             return new MessageResult(500, "可划转余额不足");

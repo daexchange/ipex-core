@@ -37,7 +37,7 @@ public class MemberLegalCurrencyWallet {
 
     @ManyToOne
     @JoinColumn(name = "coin_id")
-    private Coin coin;
+    private OtcCoin otcCoin;
     /**
      * 可用余额
      */
