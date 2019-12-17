@@ -20,9 +20,9 @@ import java.math.BigDecimal;
 public class OtcCoin {
     @Excel(name = "otc货币编号", orderNum = "1", width = 20)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
 
-    @Id
     @Excel(name = "otc货币名称", orderNum = "1", width = 20)
     @NotBlank(message = "币名称不得为空")
     private String name;

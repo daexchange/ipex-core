@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -36,8 +37,9 @@ public class MemberLegalCurrencyWallet {
     private Long memberId;
 
     @ManyToOne
-    @JoinColumn(name = "coin_id")
+    @JoinColumn(name = "coin_id")  //, referencedColumnName="name"
     private OtcCoin otcCoin;
+    
     /**
      * 可用余额
      */

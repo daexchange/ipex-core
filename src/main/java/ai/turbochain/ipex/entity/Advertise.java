@@ -69,8 +69,8 @@ public class Advertise implements Serializable {
      * 币种
      */
     @ExcelEntity
-    @JoinColumn(name = "coin_id")
     @NotNull(message = "{Advertise.coin.null}")
+    @JoinColumn(name = "coin_id")
     @ManyToOne
     private OtcCoin coin;
 
