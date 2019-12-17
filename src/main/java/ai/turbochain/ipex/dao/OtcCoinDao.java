@@ -22,7 +22,6 @@ public interface OtcCoinDao extends BaseDao<OtcCoin> {
 
 	OtcCoin findOtcCoinByUnit(String unit);
 
-	@Query(value = "select * from OtcCoin where  name=:name")
 	OtcCoin findOtcCoinByName(String name);
 
 	@Query("select distinct a.unit from OtcCoin a where a.status = 0")
