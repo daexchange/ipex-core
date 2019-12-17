@@ -215,7 +215,6 @@ public class WithdrawRecordService extends BaseService {
 		record.setIsAuto(BooleanEnum.IS_FALSE);
 		record.setStatus(WithdrawStatus.PROCESSING);
 		withdrawApplyDao.save(record);
-
 	}
 
 	@Transactional(readOnly = true)

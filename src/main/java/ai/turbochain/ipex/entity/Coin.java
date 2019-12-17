@@ -36,6 +36,13 @@ public class Coin {
     @Excel(name = "单位", orderNum = "1", width = 20)
     @NotBlank(message = "单位不得为空")
     private String unit;
+    
+    @Excel(name = "链名称", orderNum = "1", width = 20)
+    private String chainName;
+    
+    @Excel(name = "代币地址", orderNum = "1", width = 20)
+    private String tokenAddress;
+    
     /**
      * 状态
      */
@@ -115,12 +122,22 @@ public class Coin {
      */
     @Enumerated(EnumType.ORDINAL)
     private BooleanEnum isPlatformCoin = BooleanEnum.IS_FALSE;
+    
+    
+    /**
+     * 是否是代币
+     */
+    @Enumerated(EnumType.ORDINAL)
+    private BooleanEnum isToken = BooleanEnum.IS_FALSE;
 
     /**
      * 是否是合法币种
      */
     @Column(name = "has_legal", columnDefinition = "bit default 0", nullable = false)
     private Boolean hasLegal = false;
+    
+    
+    
 
     @Transient
     private BigDecimal allBalance ;
@@ -138,4 +155,8 @@ public class Coin {
 
     @Column(columnDefinition = "int default 4 comment '提币精度'")
     private int withdrawScale;
+    
+    @Column(columnDefinition = "int default 4 comment '币单位'")
+    private int decimals;
+   
 }

@@ -20,12 +20,15 @@ import ai.turbochain.ipex.constant.BooleanEnum;
 import ai.turbochain.ipex.constant.PageModel;
 import ai.turbochain.ipex.constant.TransactionType;
 import ai.turbochain.ipex.dao.CoinDao;
+import ai.turbochain.ipex.dao.MemberDao;
 import ai.turbochain.ipex.dao.MemberDepositDao;
+import ai.turbochain.ipex.dao.MemberLegalCurrencyWalletDao;
 import ai.turbochain.ipex.dao.MemberWalletDao;
 import ai.turbochain.ipex.dto.MemberWalletDTO;
 import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.Member;
 import ai.turbochain.ipex.entity.MemberDeposit;
+import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
 import ai.turbochain.ipex.entity.MemberTransaction;
 import ai.turbochain.ipex.entity.MemberWallet;
 import ai.turbochain.ipex.entity.Order;
@@ -42,433 +45,451 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class MemberWalletService extends BaseService {
-    @Autowired
-    private MemberWalletDao memberWalletDao;
-    @Autowired
-    private CoinDao coinDao;
-    @Autowired
-    private MemberTransactionService transactionService;
-    @Autowired
-    private MemberDepositDao depositDao;
-    @Autowired(required=false)
-    private ESUtils esUtils;
-    
-    public MemberWallet save(MemberWallet wallet) {
-        return memberWalletDao.saveAndFlush(wallet);
-    }
+	@Autowired
+	private MemberWalletDao memberWalletDao;
+	@Autowired
+	private CoinDao coinDao;
+	@Autowired
+	private MemberTransactionService transactionService;
+	@Autowired
+	private MemberDao memberDao;
+	@Autowired
+	private MemberLegalCurrencyWalletDao memberLegalCurrencyWalletDao;
+	@Autowired
+	private MemberDepositDao depositDao;
+	@Autowired(required = false)
+	private ESUtils esUtils;
 
-    /**
-     * 获取钱包
-     *
-     * @param coin     otc币种
-     * @param memberId
-     * @return
-     */
-    public MemberWallet findByOtcCoinAndMemberId(OtcCoin coin, long memberId) {
-        Coin coin1 = coinDao.findByUnit(coin.getUnit());
-        return memberWalletDao.findByCoinAndMemberId(coin1, memberId);
-    }
+	public MemberWallet save(MemberWallet wallet) {
+		return memberWalletDao.saveAndFlush(wallet);
+	}
 
-    /**
-     * 钱包充值
-     *
-     * @param wallet
-     * @param amount
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public MessageResult recharge(MemberWallet wallet, BigDecimal amount) {
-        if (wallet == null) {
-            return new MessageResult(500, "wallet cannot be null");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return new MessageResult(500, "amount must large then 0");
-        }
-        int result = memberWalletDao.increaseBalance(wallet.getId(), amount);
-        if (result > 0) {
-            MemberTransaction transaction = new MemberTransaction();
-            transaction.setAmount(amount);
-            transaction.setSymbol(wallet.getCoin().getUnit());
-            transaction.setAddress(wallet.getAddress());
-            transaction.setMemberId(wallet.getMemberId());
-            transaction.setType(TransactionType.RECHARGE);
-            transaction.setFee(BigDecimal.ZERO);
-            transactionService.save(transaction);
-            //增加记录
-            return new MessageResult(0, "success");
-        } else {
-            return new MessageResult(500, "recharge failed");
-        }
-    }
+	/**
+	 * 获取钱包
+	 *
+	 * @param coin     otc币种
+	 * @param memberId
+	 * @return
+	 */
+	public MemberWallet findByOtcCoinAndMemberId(OtcCoin coin, long memberId) {
+		Coin coin1 = coinDao.findByUnit(coin.getUnit());
+		return memberWalletDao.findByCoinAndMemberId(coin1, memberId);
+	}
 
-    /**
-     * 钱包充值
-     *
-     * @param coin    币种名称
-     * @param address 地址
-     * @param amount  金额
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public MessageResult recharge(Coin coin, String address, BigDecimal amount, String txid) {
-        MemberWallet wallet = findByCoinAndAddress(coin, address);
-        if (wallet == null) {
-            return new MessageResult(500, "wallet cannot be null");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return new MessageResult(500, "amount must large then 0");
-        }
-        MemberDeposit deposit = new MemberDeposit();
-        deposit.setAddress(address);
-        deposit.setAmount(amount);
-        deposit.setMemberId(wallet.getMemberId());
-        deposit.setTxid(txid);
-        deposit.setUnit(wallet.getCoin().getUnit());
-        depositDao.save(deposit);
+	/**
+	 * 钱包充值
+	 *
+	 * @param wallet
+	 * @param amount
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public MessageResult recharge(MemberWallet wallet, BigDecimal amount) {
+		if (wallet == null) {
+			return new MessageResult(500, "wallet cannot be null");
+		}
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			return new MessageResult(500, "amount must large then 0");
+		}
+		int result = memberWalletDao.increaseBalance(wallet.getId(), amount);
+		if (result > 0) {
+			MemberTransaction transaction = new MemberTransaction();
+			transaction.setAmount(amount);
+			transaction.setSymbol(wallet.getCoin().getUnit());
+			transaction.setAddress(wallet.getAddress());
+			transaction.setMemberId(wallet.getMemberId());
+			transaction.setType(TransactionType.RECHARGE);
+			transaction.setFee(BigDecimal.ZERO);
+			transactionService.save(transaction);
+			// 增加记录
+			return new MessageResult(0, "success");
+		} else {
+			return new MessageResult(500, "recharge failed");
+		}
+	}
 
-        wallet.setBalance(wallet.getBalance().add(amount));
-        MemberTransaction transaction = new MemberTransaction();
-        transaction.setAmount(amount);
-        transaction.setSymbol(wallet.getCoin().getUnit());
-        transaction.setAddress(wallet.getAddress());
-        transaction.setMemberId(wallet.getMemberId());
-        transaction.setType(TransactionType.RECHARGE);
-        transaction.setFee(BigDecimal.ZERO);
-        transaction.setDiscountFee("0");
-        transaction.setRealFee("0");
-        transaction.setCreateTime(new Date());
+	/**
+	 * 钱包充值
+	 *
+	 * @param coin    币种名称
+	 * @param address 地址
+	 * @param amount  金额
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public MessageResult recharge(Coin coin, String address, BigDecimal amount, String txid) {
+		MemberWallet wallet = findByCoinAndAddress(coin, address);
+		if (wallet == null) {
+			return new MessageResult(500, "wallet cannot be null");
+		}
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			return new MessageResult(500, "amount must large then 0");
+		}
+		MemberDeposit deposit = new MemberDeposit();
+		deposit.setAddress(address);
+		deposit.setAmount(amount);
+		deposit.setMemberId(wallet.getMemberId());
+		deposit.setTxid(txid);
+		deposit.setUnit(wallet.getCoin().getUnit());
+		depositDao.save(deposit);
+		Member member = memberDao.findOne(wallet.getMemberId());
+		if (member.getOrigin() != null && member.getOrigin()==2) {
+			MemberLegalCurrencyWallet memberLegalCurrencyWallet =memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(wallet.getCoin().getName(), member.getId());
+			memberLegalCurrencyWallet.setBalance(memberLegalCurrencyWallet.getBalance().add(amount));
+		}else {
+			wallet.setBalance(wallet.getBalance().add(amount));
+		}
+		MemberTransaction transaction = new MemberTransaction();
+		transaction.setAmount(amount);
+		transaction.setSymbol(wallet.getCoin().getUnit());
+		transaction.setAddress(wallet.getAddress());
+		transaction.setMemberId(wallet.getMemberId());
+		transaction.setType(TransactionType.RECHARGE);
+		transaction.setFee(BigDecimal.ZERO);
+		transaction.setDiscountFee("0");
+		transaction.setRealFee("0");
+		transaction.setCreateTime(new Date());
 
-        transaction = transactionService.save(transaction);
+		transaction = transactionService.save(transaction);
 
-        return new MessageResult(0, "success");
+		return new MessageResult(0, "success");
+	}
+	
+	/**
+	 * 根据币种和钱包地址获取钱包
+	 *
+	 * @param coin
+	 * @param address
+	 * @return
+	 */
+	public MemberWallet findByCoinAndAddress(Coin coin, String address) {
+		return memberWalletDao.findByCoinAndAddress(coin, address);
+	}
 
-    }
+	/**
+	 * 根据币种和用户ID获取钱包
+	 *
+	 * @param coin
+	 * @param member
+	 * @return
+	 */
+	public MemberWallet findByCoinAndMember(Coin coin, Member member) {
+		return memberWalletDao.findByCoinAndMemberId(coin, member.getId());
+	}
 
+	public MemberWallet findByCoinUnitAndMemberId(String coinUnit, Long memberId) {
+		Coin coin = coinDao.findByUnit(coinUnit);
+		return memberWalletDao.findByCoinAndMemberId(coin, memberId);
+	}
 
-    /**
-     * 根据币种和钱包地址获取钱包
-     *
-     * @param coin
-     * @param address
-     * @return
-     */
-    public MemberWallet findByCoinAndAddress(Coin coin, String address) {
-        return memberWalletDao.findByCoinAndAddress(coin, address);
-    }
+	public MemberWallet findByCoinAndMemberId(Coin coin, Long memberId) {
+		return memberWalletDao.findByCoinAndMemberId(coin, memberId);
+	}
 
-    /**
-     * 根据币种和用户ID获取钱包
-     *
-     * @param coin
-     * @param member
-     * @return
-     */
-    public MemberWallet findByCoinAndMember(Coin coin, Member member) {
-        return memberWalletDao.findByCoinAndMemberId(coin, member.getId());
-    }
+	/**
+	 * 根据用户查找所有钱包
+	 *
+	 * @param member
+	 * @return
+	 */
+	public List<MemberWallet> findAllByMemberId(Member member) {
+		return memberWalletDao.findAllByMemberId(member.getId());
+	}
 
-    public MemberWallet findByCoinUnitAndMemberId(String coinUnit, Long memberId) {
-        Coin coin = coinDao.findByUnit(coinUnit);
-        return memberWalletDao.findByCoinAndMemberId(coin, memberId);
-    }
+	public List<MemberWallet> findAllByMemberId(Long memberId) {
+		return memberWalletDao.findAllByMemberId(memberId);
+	}
 
-    public MemberWallet findByCoinAndMemberId(Coin coin, Long memberId) {
-        return memberWalletDao.findByCoinAndMemberId(coin, memberId);
-    }
+	/**
+	 * 冻结钱包
+	 *
+	 * @param memberWallet
+	 * @param amount
+	 * @return
+	 */
+	public MessageResult freezeBalance(MemberWallet memberWallet, BigDecimal amount) {
+		int ret = memberWalletDao.freezeBalance(memberWallet.getId(), amount);
+		if (ret > 0) {
+			return MessageResult.success();
+		} else {
+			return MessageResult.error("Information Expired");
+		}
+	}
 
-    /**
-     * 根据用户查找所有钱包
-     *
-     * @param member
-     * @return
-     */
-    public List<MemberWallet> findAllByMemberId(Member member) {
-        return memberWalletDao.findAllByMemberId(member.getId());
-    }
+	/**
+	 * 解冻钱包
+	 *
+	 * @param memberWallet
+	 * @param amount
+	 * @return
+	 */
+	public MessageResult thawBalance(MemberWallet memberWallet, BigDecimal amount) {
+		int ret = memberWalletDao.thawBalance(memberWallet.getId(), amount);
+		if (ret > 0) {
+			return MessageResult.success();
+		} else {
+			log.info("====order cancel=====订单取消异常（amount）：" + amount);
+			return MessageResult.error("Information Expired");
+		}
+	}
 
-    public List<MemberWallet> findAllByMemberId(Long memberId) {
-        return memberWalletDao.findAllByMemberId(memberId);
-    }
+	/**
+	 * 放行更改双方钱包余额
+	 *
+	 * @param order
+	 * @param ret
+	 * @throws InformationExpiredException
+	 * 
+	 *                                     public void transfer(Order order, int
+	 *                                     ret) throws InformationExpiredException {
+	 *                                     if (ret == 1) { MemberWallet
+	 *                                     customerWallet =
+	 *                                     findByOtcCoinAndMemberId(order.getCoin(),
+	 *                                     order.getCustomerId()); int is =
+	 *                                     memberWalletDao.decreaseFrozen(customerWallet.getId(),
+	 *                                     order.getNumber()); if (is > 0) {
+	 *                                     MemberWallet memberWallet =
+	 *                                     findByOtcCoinAndMemberId(order.getCoin(),
+	 *                                     order.getMemberId()); int a =
+	 *                                     memberWalletDao.increaseBalance(memberWallet.getId(),
+	 *                                     BigDecimalUtils.sub(order.getNumber(),
+	 *                                     order.getCommission())); if (a <= 0) {
+	 *                                     throw new
+	 *                                     InformationExpiredException("Information
+	 *                                     Expired"); } } else { throw new
+	 *                                     InformationExpiredException("Information
+	 *                                     Expired"); } } else { MemberWallet
+	 *                                     customerWallet =
+	 *                                     findByOtcCoinAndMemberId(order.getCoin(),
+	 *                                     order.getMemberId()); int is =
+	 *                                     memberWalletDao.decreaseFrozen(customerWallet.getId(),
+	 *                                     BigDecimalUtils.add(order.getNumber(),
+	 *                                     order.getCommission())); if (is > 0) {
+	 *                                     MemberWallet memberWallet =
+	 *                                     findByOtcCoinAndMemberId(order.getCoin(),
+	 *                                     order.getCustomerId()); int a =
+	 *                                     memberWalletDao.increaseBalance(memberWallet.getId(),
+	 *                                     order.getNumber()); if (a <= 0) { throw
+	 *                                     new
+	 *                                     InformationExpiredException("Information
+	 *                                     Expired"); } } else { throw new
+	 *                                     InformationExpiredException("Information
+	 *                                     Expired"); } }
+	 * 
+	 *                                     }
+	 */
 
-    /**
-     * 冻结钱包
-     *
-     * @param memberWallet
-     * @param amount
-     * @return
-     */
-    public MessageResult freezeBalance(MemberWallet memberWallet, BigDecimal amount) {
-        int ret = memberWalletDao.freezeBalance(memberWallet.getId(), amount);
-        if (ret > 0) {
-            return MessageResult.success();
-        } else {
-            return MessageResult.error("Information Expired");
-        }
-    }
+	/* */
 
-    /**
-     * 解冻钱包
-     *
-     * @param memberWallet
-     * @param amount
-     * @return
-     */
-    public MessageResult thawBalance(MemberWallet memberWallet, BigDecimal amount) {
-        int ret = memberWalletDao.thawBalance(memberWallet.getId(), amount);
-        if (ret > 0) {
-            return MessageResult.success();
-        } else {
-            log.info("====order cancel=====订单取消异常（amount）："+amount);
-            return MessageResult.error("Information Expired");
-        }
-    }
+	/**
+	 * 放行更改双方钱包余额
+	 *
+	 * @param order
+	 * @param ret
+	 * @throws InformationExpiredException
+	 */
+	public void transferAdmin(Order order, int ret) throws InformationExpiredException {
+		if (ret == 1 || ret == 4) {
+			trancerDetail(order, order.getCustomerId(), order.getMemberId());
+		} else {
+			trancerDetail(order, order.getMemberId(), order.getCustomerId());
 
-    /**
-     * 放行更改双方钱包余额
-     *
-     * @param order
-     * @param ret
-     * @throws InformationExpiredException
-     
-    public void transfer(Order order, int ret) throws InformationExpiredException {
-        if (ret == 1) {
-            MemberWallet customerWallet = findByOtcCoinAndMemberId(order.getCoin(), order.getCustomerId());
-            int is = memberWalletDao.decreaseFrozen(customerWallet.getId(), order.getNumber());
-            if (is > 0) {
-                MemberWallet memberWallet = findByOtcCoinAndMemberId(order.getCoin(), order.getMemberId());
-                int a = memberWalletDao.increaseBalance(memberWallet.getId(), BigDecimalUtils.sub(order.getNumber(), order.getCommission()));
-                if (a <= 0) {
-                    throw new InformationExpiredException("Information Expired");
-                }
-            } else {
-                throw new InformationExpiredException("Information Expired");
-            }
-        } else {
-            MemberWallet customerWallet = findByOtcCoinAndMemberId(order.getCoin(), order.getMemberId());
-            int is = memberWalletDao.decreaseFrozen(customerWallet.getId(), BigDecimalUtils.add(order.getNumber(), order.getCommission()));
-            if (is > 0) {
-                MemberWallet memberWallet = findByOtcCoinAndMemberId(order.getCoin(), order.getCustomerId());
-                int a = memberWalletDao.increaseBalance(memberWallet.getId(), order.getNumber());
-                if (a <= 0) {
-                    throw new InformationExpiredException("Information Expired");
-                }
-            } else {
-                throw new InformationExpiredException("Information Expired");
-            }
-        }
+		}
 
-    }
-*/
+	}
 
+	private void trancerDetail(Order order, long sellerId, long buyerId) throws InformationExpiredException {
+		MemberWallet customerWallet = findByOtcCoinAndMemberId(order.getCoin(), sellerId);
+		// 卖币者，买币者要处理的金额
+		BigDecimal sellerAmount, buyerAmount;
+		if (order.getMemberId() == sellerId) {
+			sellerAmount = BigDecimalUtils.add(order.getNumber(), order.getCommission());
+			buyerAmount = order.getNumber();
+		} else {
+			sellerAmount = order.getNumber();
+			buyerAmount = order.getNumber().subtract(order.getCommission());
+		}
+		int is = memberWalletDao.decreaseFrozen(customerWallet.getId(), sellerAmount);
+		if (is > 0) {
+			MemberWallet memberWallet = findByOtcCoinAndMemberId(order.getCoin(), buyerId);
+			int a = memberWalletDao.increaseBalance(memberWallet.getId(), buyerAmount);
+			if (a <= 0) {
+				throw new InformationExpiredException("Information Expired");
+			}
+		} else {
+			throw new InformationExpiredException("Information Expired");
+		}
+	}
 
-    /* */
+	public int deductBalance(MemberWallet memberWallet, BigDecimal amount) {
+		return memberWalletDao.decreaseBalance(memberWallet.getId(), amount);
+	}
 
-    /**
-     * 放行更改双方钱包余额
-     *
-     * @param order
-     * @param ret
-     * @throws InformationExpiredException
-     */
-    public void transferAdmin(Order order, int ret) throws InformationExpiredException {
-        if (ret == 1 || ret == 4) {
-            trancerDetail(order, order.getCustomerId(), order.getMemberId());
-        } else {
-            trancerDetail(order, order.getMemberId(), order.getCustomerId());
+	@Override
+	public List<MemberWallet> findAll() {
+		return memberWalletDao.findAll();
+	}
 
-        }
+	public List<MemberWallet> findAllByCoin(Coin coin) {
+		return memberWalletDao.findAllByCoin(coin);
+	}
 
-    }
+	/**
+	 * 锁定钱包
+	 *
+	 * @param uid
+	 * @param unit
+	 * @return
+	 */
+	@Transactional
+	public boolean lockWallet(Long uid, String unit) {
+		MemberWallet wallet = findByCoinUnitAndMemberId(unit, uid);
+		if (wallet != null && wallet.getIsLock() == BooleanEnum.IS_FALSE) {
+			wallet.setIsLock(BooleanEnum.IS_TRUE);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
+	/**
+	 * 解锁钱包
+	 *
+	 * @param uid
+	 * @param unit
+	 * @return
+	 */
+	@Transactional
+	public boolean unlockWallet(Long uid, String unit) {
+		MemberWallet wallet = findByCoinUnitAndMemberId(unit, uid);
+		if (wallet != null && wallet.getIsLock() == BooleanEnum.IS_TRUE) {
+			wallet.setIsLock(BooleanEnum.IS_FALSE);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    private void trancerDetail(Order order, long sellerId, long buyerId) throws InformationExpiredException {
-        MemberWallet customerWallet = findByOtcCoinAndMemberId(order.getCoin(), sellerId);
-        //卖币者，买币者要处理的金额
-        BigDecimal sellerAmount, buyerAmount;
-        if (order.getMemberId() == sellerId) {
-            sellerAmount = BigDecimalUtils.add(order.getNumber(), order.getCommission());
-            buyerAmount = order.getNumber();
-        } else {
-            sellerAmount = order.getNumber();
-            buyerAmount = order.getNumber().subtract(order.getCommission());
-        }
-        int is = memberWalletDao.decreaseFrozen(customerWallet.getId(), sellerAmount);
-        if (is > 0) {
-            MemberWallet memberWallet = findByOtcCoinAndMemberId(order.getCoin(), buyerId);
-            int a = memberWalletDao.increaseBalance(memberWallet.getId(), buyerAmount);
-            if (a <= 0) {
-                throw new InformationExpiredException("Information Expired");
-            }
-        } else {
-            throw new InformationExpiredException("Information Expired");
-        }
-    }
+	public MemberWallet findOneByCoinNameAndMemberId(String coinName, long memberId) {
+		BooleanExpression and = QMemberWallet.memberWallet.coin.name.eq(coinName)
+				.and(QMemberWallet.memberWallet.memberId.eq(memberId));
+		return memberWalletDao.findOne(and);
+	}
 
-    public int deductBalance(MemberWallet memberWallet, BigDecimal amount) {
-        return memberWalletDao.decreaseBalance(memberWallet.getId(), amount);
-    }
+	public Page<MemberWalletDTO> joinFind(List<Predicate> predicates, QMember qMember, QMemberWallet qMemberWallet,
+			PageModel pageModel) {
+		List<OrderSpecifier> orderSpecifiers = pageModel.getOrderSpecifiers();
+		predicates.add(qMember.id.eq(qMemberWallet.memberId));
+		JPAQuery<MemberWalletDTO> query = queryFactory
+				.select(Projections.fields(MemberWalletDTO.class, qMemberWallet.id.as("id"),
+						qMemberWallet.memberId.as("memberId"), qMember.username, qMember.realName.as("realName"),
+						qMember.email, qMember.mobilePhone.as("mobilePhone"), qMemberWallet.balance,
+						qMemberWallet.address, qMemberWallet.coin.unit, qMemberWallet.frozenBalance.as("frozenBalance"),
+						qMemberWallet.balance.add(qMemberWallet.frozenBalance).as("allBalance")))
+				.from(QMember.member, QMemberWallet.memberWallet)
+				.where(predicates.toArray(new Predicate[predicates.size()]))
+				.orderBy(orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]));
+		List<MemberWalletDTO> content = query.offset((pageModel.getPageNo() - 1) * pageModel.getPageSize())
+				.limit(pageModel.getPageSize()).fetch();
+		long total = query.fetchCount();
+		return new PageImpl<>(content, pageModel.getPageable(), total);
+	}
 
-    @Override
-    public List<MemberWallet> findAll() {
-        return memberWalletDao.findAll();
-    }
+	public BigDecimal getAllBalance(String coinName) {
+		return memberWalletDao.getWalletAllBalance(coinName);
+	}
 
-    public List<MemberWallet> findAllByCoin(Coin coin) {
-        return memberWalletDao.findAllByCoin(coin);
-    }
+	public MemberDeposit findDeposit(String address, String txid) {
+		return depositDao.findByAddressAndTxid(address, txid);
+	}
 
-    /**
-     * 锁定钱包
-     *
-     * @param uid
-     * @param unit
-     * @return
-     */
-    @Transactional
-    public boolean lockWallet(Long uid, String unit) {
-        MemberWallet wallet = findByCoinUnitAndMemberId(unit, uid);
-        if (wallet != null && wallet.getIsLock() == BooleanEnum.IS_FALSE) {
-            wallet.setIsLock(BooleanEnum.IS_TRUE);
-            return true;
-        } else {
-            return false;
-        }
-    }
+	public void decreaseFrozen(Long walletId, BigDecimal amount) {
+		memberWalletDao.decreaseFrozen(walletId, amount);
+	}
 
-    /**
-     * 解锁钱包
-     *
-     * @param uid
-     * @param unit
-     * @return
-     */
-    @Transactional
-    public boolean unlockWallet(Long uid, String unit) {
-        MemberWallet wallet = findByCoinUnitAndMemberId(unit, uid);
-        if (wallet != null && wallet.getIsLock() == BooleanEnum.IS_TRUE) {
-            wallet.setIsLock(BooleanEnum.IS_FALSE);
-            return true;
-        } else {
-            return false;
-        }
-    }
+	public void increaseBalance(Long walletId, BigDecimal amount) {
+		memberWalletDao.increaseBalance(walletId, amount);
+	}
 
-    public MemberWallet findOneByCoinNameAndMemberId(String coinName, long memberId) {
-        BooleanExpression and = QMemberWallet.memberWallet.coin.name.eq(coinName)
-                .and(QMemberWallet.memberWallet.memberId.eq(memberId));
-        return memberWalletDao.findOne(and);
-    }
+	public int unfreezeLess() {
+		return memberWalletDao.unfreezeLess();
+	}
 
-    public Page<MemberWalletDTO> joinFind(List<Predicate> predicates,QMember qMember ,QMemberWallet qMemberWallet,PageModel pageModel) {
-        List<OrderSpecifier> orderSpecifiers = pageModel.getOrderSpecifiers();
-        predicates.add(qMember.id.eq(qMemberWallet.memberId));
-        JPAQuery<MemberWalletDTO> query = queryFactory.select(
-                        Projections.fields(MemberWalletDTO.class, qMemberWallet.id.as("id"),qMemberWallet.memberId.as("memberId") ,qMember.username,qMember.realName.as("realName"),
-                        qMember.email,qMember.mobilePhone.as("mobilePhone"),qMemberWallet.balance,qMemberWallet.address,qMemberWallet.coin.unit
-                        ,qMemberWallet.frozenBalance.as("frozenBalance"),qMemberWallet.balance.add(qMemberWallet.frozenBalance).as("allBalance"))).from(QMember.member,QMemberWallet.memberWallet).where(predicates.toArray(new Predicate[predicates.size()]))
-                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]));
-        List<MemberWalletDTO> content = query.offset((pageModel.getPageNo()-1)*pageModel.getPageSize()).limit(pageModel.getPageSize()).fetch();
-        long total = query.fetchCount();
-        return new PageImpl<>(content, pageModel.getPageable(), total);
-    }
+	public int unfreezeMore() {
+		return memberWalletDao.unfreezeMore();
+	}
 
-    public BigDecimal getAllBalance(String coinName){
-        return memberWalletDao.getWalletAllBalance(coinName);
-    }
-
-    public MemberDeposit findDeposit(String address,String txid){
-        return depositDao.findByAddressAndTxid(address,txid);
-    }
-
-    public void decreaseFrozen(Long walletId,BigDecimal amount){
-        memberWalletDao.decreaseFrozen(walletId,amount);
-    }
-
-    public void increaseBalance(Long walletId,BigDecimal amount){
-        memberWalletDao.increaseBalance(walletId,amount);
-    }
-    
-    
-    public int unfreezeLess(){
-        return memberWalletDao.unfreezeLess();
-    }
-    
-    public int unfreezeMore(){
-        return memberWalletDao.unfreezeMore();
-    }
-    
-    
 //    public int initSuperPaterner(long memberId){
 //        return memberWalletDao.initSuperPaterner(memberId);
 //    }
-    
-    public int dropWeekTable(int weekDay){
-        return memberWalletDao.dropWeekTable(weekDay);
-    }
-    
-    public int createWeekTable(int weekDay){
-        return memberWalletDao.createWeekTable(weekDay);
-    }
 
-    public BigDecimal getWalletBalanceAmount(String coinId,int week){
-        return memberWalletDao.getWalletBalanceAmount(coinId,week);
-    }
+	public int dropWeekTable(int weekDay) {
+		return memberWalletDao.dropWeekTable(weekDay);
+	}
 
-    public List<MemberWallet> geteveryBHB(String coinName,int week){
-        return memberWalletDao.geteveryBHB(coinName,week);
-    }
+	public int createWeekTable(int weekDay) {
+		return memberWalletDao.createWeekTable(weekDay);
+	}
 
+	public BigDecimal getWalletBalanceAmount(String coinId, int week) {
+		return memberWalletDao.getWalletBalanceAmount(coinId, week);
+	}
 
-    //更新团队钱包
-    public int updateTeamWallet(BigDecimal teamBalance,long teamId){
-        return memberWalletDao.updateTeamWallet(teamBalance,teamId);
-    }
+	public List<MemberWallet> geteveryBHB(String coinName, int week) {
+		return memberWalletDao.geteveryBHB(coinName, week);
+	}
 
-    /**
-     * 根据 coinId和会员ID查询会员账户信息
-     * @param coinId
-     * @param memberId
-     * @return
-     */
-    public MemberWallet getMemberWalletByCoinAndMemberId(String coinId, long memberId) {
-        return memberWalletDao.getMemberWalletByCoinAndMemberId(coinId,memberId);
-    }
+	// 更新团队钱包
+	public int updateTeamWallet(BigDecimal teamBalance, long teamId) {
+		return memberWalletDao.updateTeamWallet(teamBalance, teamId);
+	}
 
-    /**
-     * 根据用户ID和coinID更新用户钱包
-     *
-     */
-    @Transactional
-    public int updateByMemberIdAndCoinId(long memberId,String coinId,BigDecimal balance){
-        return memberWalletDao.updateByMemberIdAndCoinId(memberId,coinId,balance);
-    }
+	/**
+	 * 根据 coinId和会员ID查询会员账户信息
+	 * 
+	 * @param coinId
+	 * @param memberId
+	 * @return
+	 */
+	public MemberWallet getMemberWalletByCoinAndMemberId(String coinId, long memberId) {
+		return memberWalletDao.getMemberWalletByCoinAndMemberId(coinId, memberId);
+	}
 
-    /**
-     * 增加用户BHB钱包余额
-     * @param mineAmount
-     * @param memberId
-     * @return
-     */
-    public int increaseBalanceForBHB(BigDecimal mineAmount,Long memberId) {
-       return  memberWalletDao.increaseBalanceForBHB(mineAmount,memberId);
-    }
+	/**
+	 * 根据用户ID和coinID更新用户钱包
+	 *
+	 */
+	@Transactional
+	public int updateByMemberIdAndCoinId(long memberId, String coinId, BigDecimal balance) {
+		return memberWalletDao.updateByMemberIdAndCoinId(memberId, coinId, balance);
+	}
 
+	/**
+	 * 增加用户BHB钱包余额
+	 * 
+	 * @param mineAmount
+	 * @param memberId
+	 * @return
+	 */
+	public int increaseBalanceForBHB(BigDecimal mineAmount, Long memberId) {
+		return memberWalletDao.increaseBalanceForBHB(mineAmount, memberId);
+	}
 
-    /**
-     * 查询待释放BHB大于500的
-     */
-    public List<MemberWallet> findUnfreezeGTE(){
-        return  memberWalletDao.findUnfreezeGTE();
-    }
-    /**
-     * 查询待释放BHB大于500的
-     */
-    public List<MemberWallet> findUnfreezeLTE(){
-        return  memberWalletDao.findUnfreezeLTE();
-    }
+	/**
+	 * 查询待释放BHB大于500的
+	 */
+	public List<MemberWallet> findUnfreezeGTE() {
+		return memberWalletDao.findUnfreezeGTE();
+	}
 
+	/**
+	 * 查询待释放BHB大于500的
+	 */
+	public List<MemberWallet> findUnfreezeLTE() {
+		return memberWalletDao.findUnfreezeLTE();
+	}
 
-    public int updateBalanceByIdAndAmount (long id,double amount){
-        return memberWalletDao.updateBalanceByIdAndAmount(id,amount);
-    }
+	public int updateBalanceByIdAndAmount(long id, double amount) {
+		return memberWalletDao.updateBalanceByIdAndAmount(id, amount);
+	}
 }

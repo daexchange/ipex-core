@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import ai.turbochain.ipex.dao.base.BaseDao;
+import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
 import ai.turbochain.ipex.entity.OtcCoin;
 

@@ -1,7 +1,5 @@
 package com.osp.blockchain.bean;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 用户
@@ -9,47 +7,25 @@ import io.swagger.annotations.ApiModelProperty;
  * @author zmc
  *
  */
-@ApiModel(description = "用户")
 public class User {
 
-	/**
-	 * 用户账号
-	 */
-	@ApiModelProperty(value = "用户编号", name = "id", required = true)
 	private Integer id;
-	@ApiModelProperty(value = "用户名", name = "name")
 	private String name;
-	@ApiModelProperty(value = "用户头像url", name = "icon")
 	private String icon;
-	@ApiModelProperty(value = "性别", name = "sex")
 	private Integer sex;
-	@ApiModelProperty(value = "真实姓名", name = "realName")
 	private String realName;
-	@ApiModelProperty(value = "邮箱", name = "email")
 	private String email;
-	@ApiModelProperty(value = "手机号码", name = "phone")
 	private String phone;
-	@ApiModelProperty(value = "邀请码", name = "inviteCode")
 	private String inviteCode;
-	@ApiModelProperty(value = "QQ", name = "qq")
 	private String qq;
-	@ApiModelProperty(value = "电报", name = "telegram")
 	private String telegram;
-	@ApiModelProperty(value = "推特", name = "twitter")
 	private String twitter;
-	@ApiModelProperty(value = "脸书", name = "facebook")
 	private String facebook;
-	@ApiModelProperty(value = "微信", name = "wechat")
 	private String wechat;
-	@ApiModelProperty(value = "助记词哈希，此字段不支持修改", name = "mnemonicWordHash")
 	private String mnemonicWordHash;
-	@ApiModelProperty(value = "IM用户编号，此字段不支持修改", name = "imUserid")
 	private Integer imUserid;
-	@ApiModelProperty(value = "IM用户密码，此字段不支持修改", name = "imPassword")
 	private String imPassword;
-	@ApiModelProperty(value = "用户密码，此字段不支持修改", name = "password")
 	private String password;
-	@ApiModelProperty(value = "IPEX用户编号，此字段不支持修改", name = "ipexId")
 	private Long ipexId;
 
 	public User() {
