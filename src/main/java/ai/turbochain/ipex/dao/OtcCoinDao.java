@@ -16,13 +16,16 @@ import java.util.List;
  */
 public interface OtcCoinDao extends BaseDao<OtcCoin> {
 
-    OtcCoin findOtcCoinByUnitAndStatus(String unit, CommonStatus status);
+	OtcCoin findOtcCoinByUnitAndStatus(String unit, CommonStatus status);
 
-    List<OtcCoin> findAllByStatus(CommonStatus status);
+	List<OtcCoin> findAllByStatus(CommonStatus status);
 
-    OtcCoin findOtcCoinByUnit(String unit);
+	OtcCoin findOtcCoinByUnit(String unit);
 
-    @Query("select distinct a.unit from OtcCoin a where a.status = 0")
-    List<String> findAllUnits();
+	@Query(value = "select * from OtcCoin where  name=:name")
+	OtcCoin findOtcCoinByName(String name);
+
+	@Query("select distinct a.unit from OtcCoin a where a.status = 0")
+	List<String> findAllUnits();
 
 }

@@ -24,6 +24,7 @@ import ai.turbochain.ipex.dao.MemberDao;
 import ai.turbochain.ipex.dao.MemberDepositDao;
 import ai.turbochain.ipex.dao.MemberLegalCurrencyWalletDao;
 import ai.turbochain.ipex.dao.MemberWalletDao;
+import ai.turbochain.ipex.dao.OtcCoinDao;
 import ai.turbochain.ipex.dto.MemberWalletDTO;
 import ai.turbochain.ipex.entity.Coin;
 import ai.turbochain.ipex.entity.Member;
@@ -49,6 +50,8 @@ public class MemberWalletService extends BaseService {
 	private MemberWalletDao memberWalletDao;
 	@Autowired
 	private CoinDao coinDao;
+	@Autowired
+	private OtcCoinDao otcCoinDao;
 	@Autowired
 	private MemberTransactionService transactionService;
 	@Autowired
@@ -134,7 +137,8 @@ public class MemberWalletService extends BaseService {
 		depositDao.save(deposit);
 		Member member = memberDao.findOne(wallet.getMemberId());
 		if (member.getOrigin() != null && member.getOrigin()==2) {
-			MemberLegalCurrencyWallet memberLegalCurrencyWallet =memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(wallet.getCoin().getName(), member.getId());
+			OtcCoin otcCoin = otcCoinDao.findOtcCoinByName(wallet.getCoin().getName());
+			MemberLegalCurrencyWallet memberLegalCurrencyWallet =memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(String.valueOf(otcCoin.getId()), member.getId());
 			memberLegalCurrencyWallet.setBalance(memberLegalCurrencyWallet.getBalance().add(amount));
 		}else {
 			wallet.setBalance(wallet.getBalance().add(amount));
