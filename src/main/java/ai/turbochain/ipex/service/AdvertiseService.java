@@ -54,7 +54,9 @@ import ai.turbochain.ipex.entity.transform.ScanAdvertise;
 import ai.turbochain.ipex.entity.transform.Special;
 import ai.turbochain.ipex.entity.transform.SpecialPage;
 import ai.turbochain.ipex.exception.InformationExpiredException;
+import ai.turbochain.ipex.pagination.Criteria;
 import ai.turbochain.ipex.pagination.PageResult;
+import ai.turbochain.ipex.pagination.Restrictions;
 import ai.turbochain.ipex.service.Base.BaseService;
 import ai.turbochain.ipex.util.BigDecimalUtils;
 import ai.turbochain.ipex.util.DateUtil;
@@ -545,6 +547,17 @@ public class AdvertiseService extends BaseService {
         return advertiseDao.findAll(predicate, pageable);
     }
 
+    public Page<Advertise> pageQuery(int pageNo, Integer pageSize, AdvertiseControlStatus status, Long memberId) {
+        Sort orders = Criteria.sortStatic("id.desc");
+        PageRequest pageRequest = new PageRequest(pageNo, pageSize, orders);
+        Criteria<Advertise> specification = new Criteria<Advertise>();
+        specification.add(Restrictions.eq("member.id", memberId, true));
+        if (status!=null) {
+            specification.add(Restrictions.eq("status", status, true));
+        }
+        return advertiseDao.findAll(specification, pageRequest);
+    }
+    
     public Special<ScanAdvertise> getLatestAdvertise() throws SQLException, DataException {
         Special<ScanAdvertise> special = new Special<>();
         String sql = "SELECT\n" +
