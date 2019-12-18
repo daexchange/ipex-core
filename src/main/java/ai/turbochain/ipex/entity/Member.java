@@ -212,4 +212,6 @@ public class Member {
     private Boolean signInAbility = true;
     
     private Integer origin;
+    
+    private String nickName;
 }

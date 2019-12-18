@@ -1,6 +1,29 @@
 package ai.turbochain.ipex.service;
 
 
+import static ai.turbochain.ipex.util.BigDecimalUtils.add;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.SQLQuery;
+import org.hibernate.transform.Transformers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
@@ -10,11 +33,9 @@ import com.querydsl.jpa.impl.JPAQuery;
 import ai.turbochain.ipex.constant.AdvertiseType;
 import ai.turbochain.ipex.constant.OrderStatus;
 import ai.turbochain.ipex.constant.PageModel;
-import ai.turbochain.ipex.constant.TransactionTypeEnum;
 import ai.turbochain.ipex.dao.OrderDao;
-import ai.turbochain.ipex.entity.MemberWallet;
+import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
 import ai.turbochain.ipex.entity.Order;
-import ai.turbochain.ipex.entity.QAppeal;
 import ai.turbochain.ipex.entity.QOrder;
 import ai.turbochain.ipex.exception.InformationExpiredException;
 import ai.turbochain.ipex.pagination.Criteria;
@@ -24,25 +45,6 @@ import ai.turbochain.ipex.service.Base.BaseService;
 import ai.turbochain.ipex.util.IdWorkByTwitter;
 import ai.turbochain.ipex.util.MessageResult;
 import ai.turbochain.ipex.vo.OtcOrderVO;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
-import org.hibernate.transform.Transformers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import static ai.turbochain.ipex.util.BigDecimalUtils.add;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author GS
@@ -63,7 +65,7 @@ public class OrderService extends BaseService {
     @Autowired
     private AdvertiseService advertiseService;
     @Autowired
-    private MemberWalletService memberWalletService;
+    private MemberLegalCurrencyWalletService memberLegalCurrencyWalletService;
 
     @Transactional(rollbackFor = Exception.class)
     public void cancelOrderTask(Order order) throws InformationExpiredException {
@@ -73,8 +75,8 @@ public class OrderService extends BaseService {
                 throw new InformationExpiredException("Information Expired");
             }
             //更改钱包
-            MemberWallet memberWallet = memberWalletService.findByOtcCoinAndMemberId(order.getCoin(), order.getCustomerId());
-            MessageResult result = memberWalletService.thawBalance(memberWallet, order.getNumber());
+            MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletService.findByOtcCoinAndMemberId(order.getCoin(), order.getCustomerId());
+            MessageResult result = memberLegalCurrencyWalletService.thawBalance(memberLegalCurrencyWallet, order.getNumber());
             if (result.getCode() != 0) {
                 throw new InformationExpiredException("Information Expired");
             }
@@ -84,8 +86,8 @@ public class OrderService extends BaseService {
                 throw new InformationExpiredException("Information Expired");
             }
             //更改钱包
-            MemberWallet memberWallet = memberWalletService.findByOtcCoinAndMemberId(order.getCoin(), order.getMemberId());
-            MessageResult result = memberWalletService.thawBalance(memberWallet, add(order.getNumber(), order.getCommission()));
+            MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletService.findByOtcCoinAndMemberId(order.getCoin(), order.getMemberId());
+            MessageResult result = memberLegalCurrencyWalletService.thawBalance(memberLegalCurrencyWallet, add(order.getNumber(), order.getCommission()));
             if (result.getCode() != 0) {
                 throw new InformationExpiredException("Information Expired");
             }

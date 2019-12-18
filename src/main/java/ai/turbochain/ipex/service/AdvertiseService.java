@@ -253,7 +253,9 @@ public class AdvertiseService extends BaseService {
                 });
         return excellents;
     }
-
+    
+    public static final Integer ORIGIN_TYPE = 2;
+    
     public SpecialPage<ScanAdvertise> paginationAdvertise(int pageNo, int pageSize, OtcCoin otcCoin, AdvertiseType advertiseType, double marketPrice, int isCertified) throws SQLException, DataException {
         SpecialPage<ScanAdvertise> specialPage = new SpecialPage<>();
         String sql = "SELECT\n" +
@@ -274,6 +276,7 @@ public class AdvertiseService extends BaseService {
                 "JOIN member b ON a.member_id = b.id\n" +
                 (isCertified == 1 ? "AND b.member_level = 2\n" : " ") +
                 "AND a.coin_id = ?\n" +
+                "AND a.origin = ?\n" +
                 "AND a.advertise_type = ?\n" +
                 "AND a.`status` = 0\n" +
                 "ORDER BY\n" +
@@ -281,7 +284,7 @@ public class AdvertiseService extends BaseService {
                 "\ta.id\n" +
                 "LIMIT ?,\n" +
                 " ?";
-        List<Map<String, String>> list = DB.query(sql, marketPrice, otcCoin.getId(), advertiseType.ordinal(), (pageNo - 1) * pageSize, pageSize);
+        List<Map<String, String>> list = DB.query(sql, marketPrice, otcCoin.getId(), ORIGIN_TYPE,advertiseType.ordinal(), (pageNo - 1) * pageSize, pageSize);
         if (list.size() > 0) {
             String sql1 = "SELECT\n" +
                     "\tCOUNT(a.id) total\n" +
@@ -290,9 +293,10 @@ public class AdvertiseService extends BaseService {
                     "JOIN member b ON a.member_id = b.id\n" +
                     (isCertified == 1 ? "AND b.member_level = 2\n" : " ") +
                     "AND a.coin_id = ?\n" +
+                    "AND a.origin = ?\n" +
                     "AND a.advertise_type = ?\n" +
                     "AND a.`status` = 0";
-            List<Map<String, String>> list1 = DB.query(sql1, otcCoin.getId(), advertiseType.ordinal());
+            List<Map<String, String>> list1 = DB.query(sql1, otcCoin.getId(),ORIGIN_TYPE, advertiseType.ordinal());
             Map<String, String> map = list1.get(0);
             int total = Integer.valueOf(map.get("total"));
             specialPage.setTotalElement(total);
@@ -547,11 +551,12 @@ public class AdvertiseService extends BaseService {
         return advertiseDao.findAll(predicate, pageable);
     }
 
-    public Page<Advertise> pageQuery(int pageNo, Integer pageSize, AdvertiseControlStatus status, Long memberId) {
+    public Page<Advertise> pageQuery(int pageNo, Integer pageSize,Integer origin, AdvertiseControlStatus status, Long memberId) {
         Sort orders = Criteria.sortStatic("id.desc");
         PageRequest pageRequest = new PageRequest(pageNo, pageSize, orders);
         Criteria<Advertise> specification = new Criteria<Advertise>();
         specification.add(Restrictions.eq("member.id", memberId, true));
+        specification.add(Restrictions.eq("origin", origin, true));
         if (status!=null) {
             specification.add(Restrictions.eq("status", status, true));
         }
