@@ -179,6 +179,32 @@ public class OrderService extends BaseService {
         return orderDao.findAll(specification, pageRequest);
     }
 
+    /**
+     * 查询进行中的订单
+     * @param pageNo
+     * @param pageSize
+     * @param status_1
+     * @param status_2
+     * @param status_4
+     * @param id
+     * @param orderSn
+     * @return
+     */
+    public Page<Order> pageQueryApp(int pageNo, Integer pageSize, OrderStatus status_1,OrderStatus status_2,OrderStatus status_4,long id, String orderSn){
+        Sort orders = Criteria.sortStatic("id.desc");
+        PageRequest pageRequest = new PageRequest(pageNo, pageSize, orders);
+        Criteria<Order> specification = new Criteria<Order>();
+        specification.add(Restrictions.or(Restrictions.eq("memberId", id, false), Restrictions.eq("customerId", id, false)));
+//        specification.add(Restrictions.or(Restrictions.eq("status", status_1, false)));
+//        specification.add(Restrictions.or(Restrictions.eq("status", status_2, false)));
+//        specification.add(Restrictions.or(Restrictions.eq("status", status_4, false)));
+        specification.add(Restrictions.or(Restrictions.eq("status", status_1, false),Restrictions.eq("status", status_2, false),Restrictions.eq("status", status_4, false)));
+        if (StringUtils.isNotBlank(orderSn)) {
+            specification.add(Restrictions.like("orderSn", orderSn, false));
+        }
+        return orderDao.findAll(specification, pageRequest);
+    }
+
 
     public Map getOrderBySn(Long memberId, String orderSn) {
         String sql = "select o.*,m.real_name from otc_order o  join member m on o.customer_id=m.id and o.member_id=:memberId and o.order_sn =:orderSn ";
