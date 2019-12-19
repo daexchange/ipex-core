@@ -59,7 +59,7 @@ public class MemberAddressService extends BaseService {
 		if (coin == null || coin.getCanWithdraw().equals(BooleanEnum.IS_FALSE)) {
 			return MessageResult.error(600, "The currency does not support withdrawals");
 		}
-		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndAddressAndCoinId(memberId, coin);
+		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndCoinId(memberId, coin);
 		if (memberAddress != null) {
 			memberAddressDao.updateMemberAddressOfwithDraw(address, remark, memberAddress.getId(), memberId, coin);
 			return MessageResult.success();
@@ -85,13 +85,13 @@ public class MemberAddressService extends BaseService {
 		if (coin == null || coin.getCanWithdraw().equals(BooleanEnum.IS_FALSE)) {
 			return MessageResult.error(600, "The currency does not support withdrawals");
 		}
-		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndAddressAndCoinId(memberId, coin);
+		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndCoinId(memberId, coin);
 		if (memberAddress != null) {
 			MessageResult messageResult = MessageResult.success();
 			messageResult.setData(memberAddress);
 			return messageResult;
 		} else {
-			return MessageResult.error("请输入正确的币名：" + coinName);
+			return MessageResult.error("用户：" + memberId + "未保存" + coinName + "提币地址");
 		}
 	}
 

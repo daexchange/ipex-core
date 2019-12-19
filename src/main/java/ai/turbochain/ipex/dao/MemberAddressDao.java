@@ -27,7 +27,7 @@ public interface MemberAddressDao extends BaseDao<MemberAddress> {
 			@Param("id") long id, @Param("memberId") long memberId, @Param("coin") Coin coin);
 
 	@Query("select a from MemberAddress a where a.coin=:coin and a.memberId=:memberId")
-	MemberAddress findByMemberIdAndAddressAndCoinId(@Param("memberId") long memberId, @Param("coin") Coin coin);
+	MemberAddress findByMemberIdAndCoinId(@Param("memberId") long memberId, @Param("coin") Coin coin);
 
 	List<MemberAddress> findAllByMemberIdAndAddressAndStatus(Long memberId, String address, CommonStatus status);
 
