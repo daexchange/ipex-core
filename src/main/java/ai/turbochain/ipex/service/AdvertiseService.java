@@ -75,7 +75,7 @@ public class AdvertiseService extends BaseService {
     private AdvertiseDao advertiseDao;
     @Autowired
     private OtcCoinDao otcCoinDao;
-    @Autowired 
+    @Autowired
     MemberLegalCurrencyWalletService memberLegalCurrencyWalletService;
     @PersistenceContext
     private EntityManager entityManager;
@@ -252,9 +252,9 @@ public class AdvertiseService extends BaseService {
                 });
         return excellents;
     }
-    
+
     public static final Integer ORIGIN_TYPE = 2;
-    
+
     public SpecialPage<ScanAdvertise> paginationAdvertise(int pageNo, int pageSize, OtcCoin otcCoin, AdvertiseType advertiseType, double marketPrice, int isCertified) throws SQLException, DataException {
         SpecialPage<ScanAdvertise> specialPage = new SpecialPage<>();
         String sql = "SELECT\n" +
@@ -269,7 +269,8 @@ public class AdvertiseService extends BaseService {
                 "\tb.avatar,\n" +
                 "\tb.username,\n" +
                 "\tb.member_level,\n" +
-                "\tb.transactions\n" +
+                "\tb.transactions,\n" +
+                "\tb.nick_name\n" +
                 "FROM\n" +
                 "\tadvertise a\n" +
                 "JOIN member b ON a.member_id = b.id\n" +
@@ -310,6 +311,7 @@ public class AdvertiseService extends BaseService {
                                     .payMode(x.get("pay_mode"))
                                     .memberName(x.get("username"))
                                     .avatar(x.get("avatar"))
+                                    .nickName(x.get("nick_name"))
                                     .minLimit(BigDecimal.valueOf(Double.valueOf(x.get("min_limit"))))
                                     .maxLimit(BigDecimal.valueOf(Double.valueOf(x.get("max_limit"))))
                                     .coinNameCn(otcCoin.getNameCn())
@@ -561,7 +563,7 @@ public class AdvertiseService extends BaseService {
         }
         return advertiseDao.findAll(specification, pageRequest);
     }
-    
+
     public Special<ScanAdvertise> getLatestAdvertise() throws SQLException, DataException {
         Special<ScanAdvertise> special = new Special<>();
         String sql = "SELECT\n" +

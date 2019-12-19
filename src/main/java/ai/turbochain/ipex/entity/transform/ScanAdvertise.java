@@ -18,6 +18,7 @@ import java.util.Date;
 public class ScanAdvertise {
     private String memberName;
     private String avatar;
+    private String nickName;
     private long advertiseId;
     /**
      * 交易次数
