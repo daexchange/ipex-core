@@ -171,9 +171,9 @@ public class WithdrawRecordService extends BaseService {
 	@Transactional
 	public void withdrawSuccess(Long withdrawId, String txid) {
 		WithdrawRecord record = findOne(withdrawId);
-		Long memberId = record.getMemberId();
-		Member member = memberService.findOne(memberId);
 		if (record != null) {
+			Long memberId = record.getMemberId();
+			Member member = memberService.findOne(memberId);
 			record.setTransactionNumber(txid);
 			record.setStatus(WithdrawStatus.SUCCESS);
 			if (member.getOrigin() == 2) {
@@ -210,6 +210,29 @@ public class WithdrawRecordService extends BaseService {
 					transaction.setCreateTime(new Date());
 					transaction = transactionService.save(transaction);
 
+				}
+			}
+		}
+	}
+
+	/**
+	 * HardId提现失败
+	 * 
+	 * @param withdrawId
+	 */
+	@Transactional
+	public void withdrawFailOfHardId(Long withdrawId) {
+		WithdrawRecord record = findOne(withdrawId);
+		if (record != null) {
+			Long memberId = record.getMemberId();
+			Member member = memberService.findOne(memberId);
+			if (member.getOrigin() == 2) {
+				MemberLegalCurrencyWallet wallet = memberLegalCurrencyWalletService
+						.findByOtcCoinUnitAndMemberId(record.getCoin().getUnit(), memberId);
+				if (wallet != null) {
+					wallet.setBalance(wallet.getBalance().add(record.getTotalAmount()));
+					wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
+					record.setStatus(WithdrawStatus.FAIL);
 				}
 			}
 		}
