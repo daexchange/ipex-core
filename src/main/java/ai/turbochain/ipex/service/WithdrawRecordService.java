@@ -1,23 +1,16 @@
 package ai.turbochain.ipex.service;
 
-import com.querydsl.core.types.*;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
+import static ai.turbochain.ipex.constant.BooleanEnum.IS_FALSE;
+import static ai.turbochain.ipex.constant.WithdrawStatus.FAIL;
+import static ai.turbochain.ipex.constant.WithdrawStatus.PROCESSING;
+import static ai.turbochain.ipex.entity.QWithdrawRecord.withdrawRecord;
+import static org.springframework.util.Assert.isTrue;
+import static org.springframework.util.Assert.notNull;
 
-import ai.turbochain.ipex.constant.BooleanEnum;
-import ai.turbochain.ipex.constant.PageModel;
-import ai.turbochain.ipex.constant.TransactionType;
-import ai.turbochain.ipex.constant.WithdrawStatus;
-import ai.turbochain.ipex.dao.WithdrawRecordDao;
-import ai.turbochain.ipex.entity.*;
-import ai.turbochain.ipex.es.ESUtils;
-import ai.turbochain.ipex.pagination.Criteria;
-import ai.turbochain.ipex.pagination.PageListMapResult;
-import ai.turbochain.ipex.pagination.PageResult;
-import ai.turbochain.ipex.pagination.Restrictions;
-import ai.turbochain.ipex.service.Base.BaseService;
-import ai.turbochain.ipex.vo.WithdrawRecordVO;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +21,34 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
-import static ai.turbochain.ipex.constant.BooleanEnum.IS_FALSE;
-import static ai.turbochain.ipex.constant.WithdrawStatus.*;
-import static ai.turbochain.ipex.entity.QWithdrawRecord.withdrawRecord;
-import static org.springframework.util.Assert.isTrue;
-import static org.springframework.util.Assert.notNull;
+import ai.turbochain.ipex.constant.BooleanEnum;
+import ai.turbochain.ipex.constant.PageModel;
+import ai.turbochain.ipex.constant.TransactionType;
+import ai.turbochain.ipex.constant.WithdrawStatus;
+import ai.turbochain.ipex.dao.WithdrawRecordDao;
+import ai.turbochain.ipex.entity.Member;
+import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
+import ai.turbochain.ipex.entity.MemberTransaction;
+import ai.turbochain.ipex.entity.MemberWallet;
+import ai.turbochain.ipex.entity.QMember;
+import ai.turbochain.ipex.entity.QWithdrawRecord;
+import ai.turbochain.ipex.entity.WithdrawRecord;
+import ai.turbochain.ipex.es.ESUtils;
+import ai.turbochain.ipex.pagination.Criteria;
+import ai.turbochain.ipex.pagination.PageListMapResult;
+import ai.turbochain.ipex.pagination.PageResult;
+import ai.turbochain.ipex.pagination.Restrictions;
+import ai.turbochain.ipex.service.Base.BaseService;
+import ai.turbochain.ipex.vo.WithdrawRecordVO;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author GS
@@ -53,6 +64,10 @@ public class WithdrawRecordService extends BaseService {
 	private MemberWalletService walletService;
 	@Autowired
 	private MemberTransactionService transactionService;
+	@Autowired
+	private MemberService memberService;
+	@Autowired
+	private MemberLegalCurrencyWalletService memberLegalCurrencyWalletService;
 	@Autowired
 	ESUtils esUtils;
 
@@ -156,25 +171,46 @@ public class WithdrawRecordService extends BaseService {
 	@Transactional
 	public void withdrawSuccess(Long withdrawId, String txid) {
 		WithdrawRecord record = findOne(withdrawId);
+		Long memberId = record.getMemberId();
+		Member member = memberService.findOne(memberId);
 		if (record != null) {
 			record.setTransactionNumber(txid);
 			record.setStatus(WithdrawStatus.SUCCESS);
-			MemberWallet wallet = walletService.findByCoinUnitAndMemberId(record.getCoin().getUnit(),
-					record.getMemberId());
-			if (wallet != null) {
-				wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
-				MemberTransaction transaction = new MemberTransaction();
-				transaction.setAmount(record.getTotalAmount());
-				transaction.setSymbol(wallet.getCoin().getUnit());
-				transaction.setAddress(wallet.getAddress());
-				transaction.setMemberId(wallet.getMemberId());
-				transaction.setType(TransactionType.WITHDRAW);
-				transaction.setFee(record.getFee());
-				transaction.setDiscountFee("0");
-				transaction.setRealFee(record.getFee() + "");
-				transaction.setCreateTime(new Date());
-				transaction = transactionService.save(transaction);
+			if (member.getOrigin() == 2) {
+				MemberLegalCurrencyWallet wallet = memberLegalCurrencyWalletService
+						.findByOtcCoinUnitAndMemberId(record.getCoin().getUnit(), memberId);
+				if (wallet != null) {
+					wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
+					MemberTransaction transaction = new MemberTransaction();
+					transaction.setAmount(record.getTotalAmount());
+					transaction.setSymbol(record.getCoin().getUnit());
+					transaction.setAddress(record.getAddress());
+					transaction.setMemberId(wallet.getMemberId());
+					transaction.setType(TransactionType.WITHDRAW);
+					transaction.setFee(record.getFee());
+					transaction.setDiscountFee("0");
+					transaction.setRealFee(record.getFee() + "");
+					transaction.setCreateTime(new Date());
+					transaction = transactionService.save(transaction);
+				}
+			} else {
+				MemberWallet wallet = walletService.findByCoinUnitAndMemberId(record.getCoin().getUnit(),
+						record.getMemberId());
+				if (wallet != null) {
+					wallet.setFrozenBalance(wallet.getFrozenBalance().subtract(record.getTotalAmount()));
+					MemberTransaction transaction = new MemberTransaction();
+					transaction.setAmount(record.getTotalAmount());
+					transaction.setSymbol(wallet.getCoin().getUnit());
+					transaction.setAddress(wallet.getAddress());
+					transaction.setMemberId(wallet.getMemberId());
+					transaction.setType(TransactionType.WITHDRAW);
+					transaction.setFee(record.getFee());
+					transaction.setDiscountFee("0");
+					transaction.setRealFee(record.getFee() + "");
+					transaction.setCreateTime(new Date());
+					transaction = transactionService.save(transaction);
 
+				}
 			}
 		}
 	}
