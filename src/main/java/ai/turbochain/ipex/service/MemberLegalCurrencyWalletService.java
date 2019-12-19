@@ -263,4 +263,44 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
         }
     }
   
+    
+    /**
+	 * 放行更改双方钱包余额
+	 *
+	 * @param order
+	 * @param ret
+	 * @throws InformationExpiredException
+	 */
+	public void transferAdmin(Order order, int ret) throws InformationExpiredException {
+		if (ret == 1 || ret == 4) {
+			trancerDetail(order, order.getCustomerId(), order.getMemberId());
+		} else {
+			trancerDetail(order, order.getMemberId(), order.getCustomerId());
+
+		}
+
+	}
+	
+	private void trancerDetail(Order order, long sellerId, long buyerId) throws InformationExpiredException {
+		MemberLegalCurrencyWallet customerMemberLegalCurrencyWallet = findByOtcCoinAndMemberId(order.getCoin(), sellerId);
+		// 卖币者，买币者要处理的金额
+		BigDecimal sellerAmount, buyerAmount;
+		if (order.getMemberId() == sellerId) {
+			sellerAmount = BigDecimalUtils.add(order.getNumber(), order.getCommission());
+			buyerAmount = order.getNumber();
+		} else {
+			sellerAmount = order.getNumber();
+			buyerAmount = order.getNumber().subtract(order.getCommission());
+		}
+		int is = memberLegalCurrencyWalletDao.decreaseFrozen(customerMemberLegalCurrencyWallet.getId(), sellerAmount);
+		if (is > 0) {
+			MemberLegalCurrencyWallet memberLegalCurrencyWallet = findByOtcCoinAndMemberId(order.getCoin(), buyerId);
+			int a = memberLegalCurrencyWalletDao.increaseBalance(memberLegalCurrencyWallet.getId(), buyerAmount);
+			if (a <= 0) {
+				throw new InformationExpiredException("Information Expired");
+			}
+		} else {
+			throw new InformationExpiredException("Information Expired");
+		}
+	}
 }

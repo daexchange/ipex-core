@@ -45,7 +45,7 @@ import ai.turbochain.ipex.dao.AdvertiseDao;
 import ai.turbochain.ipex.dao.OtcCoinDao;
 import ai.turbochain.ipex.entity.Advertise;
 import ai.turbochain.ipex.entity.Member;
-import ai.turbochain.ipex.entity.MemberWallet;
+import ai.turbochain.ipex.entity.MemberLegalCurrencyWallet;
 import ai.turbochain.ipex.entity.OtcCoin;
 import ai.turbochain.ipex.entity.transform.MemberAdvertise;
 import ai.turbochain.ipex.entity.transform.MemberAdvertiseDetail;
@@ -75,9 +75,8 @@ public class AdvertiseService extends BaseService {
     private AdvertiseDao advertiseDao;
     @Autowired
     private OtcCoinDao otcCoinDao;
-    @Autowired
-    private MemberWalletService memberWalletService;
-
+    @Autowired 
+    MemberLegalCurrencyWalletService memberLegalCurrencyWalletService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -526,8 +525,8 @@ public class AdvertiseService extends BaseService {
     @Transactional(rollbackFor = Exception.class)
     public void autoPutOffShelves(Map<String, String> map, OtcCoin otcCoin) throws InformationExpiredException {
         if (map.get("advertise_type").equals(String.valueOf(AdvertiseType.SELL.ordinal()))) {
-            MemberWallet memberWallet = memberWalletService.findByOtcCoinAndMemberId(otcCoin, Long.valueOf(map.get("member_id")));
-            MessageResult result = memberWalletService.thawBalance(memberWallet, new BigDecimal(map.get("remain_amount")));
+        	MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletService.findByOtcCoinAndMemberId(otcCoin, Long.valueOf(map.get("member_id")));
+            MessageResult result = memberLegalCurrencyWalletService.thawBalance(memberLegalCurrencyWallet, new BigDecimal(map.get("remain_amount")));
             if (result.getCode() != 0) {
                 throw new InformationExpiredException("Information Expired");
             }

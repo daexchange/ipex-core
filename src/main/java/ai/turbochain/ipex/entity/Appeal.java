@@ -68,4 +68,6 @@ public class Appeal {
     @JoinColumn(name = "admin_id")
     @ManyToOne
     private Admin admin;
+    
+    private String images;
 }

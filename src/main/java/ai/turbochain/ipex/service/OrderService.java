@@ -58,8 +58,7 @@ public class OrderService extends BaseService {
 
     @Autowired
     private OrderDao orderDao;
-
-
+    
     @Autowired
     private IdWorkByTwitter idWorkByTwitter;
     @Autowired

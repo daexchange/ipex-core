@@ -144,4 +144,9 @@ public class AppealService extends BaseService {
     public long countAuditing(){
         return appealDao.countAllByStatus(AppealStatus.NOT_PROCESSED);
     }
+    
+    public List<Appeal> findByOrder(Order order) {
+    	return appealDao.findByOrder(order);
+    }
+    
 }

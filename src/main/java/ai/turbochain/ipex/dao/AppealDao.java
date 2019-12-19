@@ -1,14 +1,14 @@
 package ai.turbochain.ipex.dao;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import ai.turbochain.ipex.constant.AppealStatus;
 import ai.turbochain.ipex.dao.base.BaseDao;
 import ai.turbochain.ipex.entity.Appeal;
-
-import java.util.Map;
+import ai.turbochain.ipex.entity.Order;
 
 /**
  * @author GS
@@ -23,4 +23,6 @@ public interface AppealDao extends BaseDao<Appeal> {
     Long getBusinessAppealAssociateIdStatistics(@Param("memberId")Long memberId);
 
     long countAllByStatus(AppealStatus status);
+    
+    List<Appeal> findByOrder(Order order);
 }
