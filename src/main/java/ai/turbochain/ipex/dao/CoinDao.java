@@ -24,6 +24,8 @@ import ai.turbochain.ipex.entity.Coin;
 @Repository
 public interface CoinDao extends JpaRepository<Coin, String>, JpaSpecificationExecutor<Coin>, QueryDslPredicateExecutor<Coin> {
     Coin findByUnit(String unit);
+    
+    Coin findByName(String name);
 
     List<Coin> findAllByCanWithdrawAndStatusAndHasLegal(BooleanEnum is, CommonStatus status, boolean hasLegal);
 

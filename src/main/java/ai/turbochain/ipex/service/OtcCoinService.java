@@ -75,6 +75,10 @@ public class OtcCoinService extends BaseService {
     public OtcCoin findByUnit(String unit) {
         return otcCoinDao.findOtcCoinByUnit(unit);
     }
+    
+    public OtcCoin findByName(String name) {
+        return otcCoinDao.findOtcCoinByName(name);
+    }
 
     public List<Map<String, String>> getAllNormalCoin() throws Exception {
         return new Model("otc_coin")
