@@ -560,7 +560,15 @@ public class AdvertiseService extends BaseService {
         specification.add(Restrictions.eq("origin", origin, true));
         if (status!=null) {
             specification.add(Restrictions.eq("status", status, true));
+        } else {
+        	List statusList = new ArrayList();
+        	
+        	statusList.add(AdvertiseControlStatus.PUT_OFF_SHELVES.getOrdinal());
+        	statusList.add(AdvertiseControlStatus.PUT_ON_SHELVES.getOrdinal());
+        	
+        	specification.add(Restrictions.in("status", statusList, true));
         }
+        
         return advertiseDao.findAll(specification, pageRequest);
     }
 
