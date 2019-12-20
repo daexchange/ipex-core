@@ -253,9 +253,9 @@ public class AdvertiseService extends BaseService {
         return excellents;
     }
 
-    public static final Integer ORIGIN_TYPE = 2;
+    
 
-    public SpecialPage<ScanAdvertise> paginationAdvertise(int pageNo, int pageSize, OtcCoin otcCoin, AdvertiseType advertiseType, double marketPrice, int isCertified) throws SQLException, DataException {
+    public SpecialPage<ScanAdvertise> paginationAdvertise(int pageNo, int pageSize, OtcCoin otcCoin, AdvertiseType advertiseType, double marketPrice, int isCertified,Integer origin) throws SQLException, DataException {
         SpecialPage<ScanAdvertise> specialPage = new SpecialPage<>();
         String sql = "SELECT\n" +
                 "\ta.*, (\n" +
@@ -284,7 +284,7 @@ public class AdvertiseService extends BaseService {
                 "\ta.id\n" +
                 "LIMIT ?,\n" +
                 " ?";
-        List<Map<String, String>> list = DB.query(sql, marketPrice, otcCoin.getId(), ORIGIN_TYPE,advertiseType.ordinal(), (pageNo - 1) * pageSize, pageSize);
+        List<Map<String, String>> list = DB.query(sql, marketPrice, otcCoin.getId(), origin,advertiseType.ordinal(), (pageNo - 1) * pageSize, pageSize);
         if (list.size() > 0) {
             String sql1 = "SELECT\n" +
                     "\tCOUNT(a.id) total\n" +
@@ -296,7 +296,7 @@ public class AdvertiseService extends BaseService {
                     "AND a.origin = ?\n" +
                     "AND a.advertise_type = ?\n" +
                     "AND a.`status` = 0";
-            List<Map<String, String>> list1 = DB.query(sql1, otcCoin.getId(),ORIGIN_TYPE, advertiseType.ordinal());
+            List<Map<String, String>> list1 = DB.query(sql1, otcCoin.getId(),origin, advertiseType.ordinal());
             Map<String, String> map = list1.get(0);
             int total = Integer.valueOf(map.get("total"));
             specialPage.setTotalElement(total);
