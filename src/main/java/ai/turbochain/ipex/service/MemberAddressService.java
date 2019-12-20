@@ -56,8 +56,8 @@ public class MemberAddressService extends BaseService {
 	public MessageResult addOrUpdateMemberAddress(Long memberId, String address, String coinName, String remark)
 			throws Exception {
 		Coin coin = coinDao.findByName(coinName);
-		if (coin == null || coin.getCanWithdraw().equals(BooleanEnum.IS_FALSE)) {
-			return MessageResult.error(600, "The currency does not support withdrawals");
+		if (coin == null) {
+			return MessageResult.error(500, coinName + "不存在");
 		}
 		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndCoinId(memberId, coin);
 		if (memberAddress != null) {
@@ -83,7 +83,7 @@ public class MemberAddressService extends BaseService {
 	public MessageResult findMemberAddressByCoinName(Long memberId, String coinName) throws Exception {
 		Coin coin = coinDao.findByName(coinName);
 		if (coin == null || coin.getCanWithdraw().equals(BooleanEnum.IS_FALSE)) {
-			return MessageResult.error(600, "The currency does not support withdrawals");
+			return MessageResult.error(500, coinName + "不存在");
 		}
 		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndCoinId(memberId, coin);
 		if (memberAddress != null) {

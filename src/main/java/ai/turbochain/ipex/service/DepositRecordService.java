@@ -1,5 +1,11 @@
 package ai.turbochain.ipex.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+
 import com.querydsl.core.types.Predicate;
 
 import ai.turbochain.ipex.constant.DepositStatusEnum;
@@ -8,12 +14,6 @@ import ai.turbochain.ipex.dao.DepositRecordDao;
 import ai.turbochain.ipex.entity.DepositRecord;
 import ai.turbochain.ipex.entity.Member;
 import ai.turbochain.ipex.service.Base.BaseService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author zhang yingxin

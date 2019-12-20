@@ -1,7 +1,16 @@
 package ai.turbochain.ipex.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -11,17 +20,10 @@ import ai.turbochain.ipex.dao.MemberDepositDao;
 import ai.turbochain.ipex.entity.MemberDeposit;
 import ai.turbochain.ipex.entity.QMember;
 import ai.turbochain.ipex.entity.QMemberDeposit;
+import ai.turbochain.ipex.pagination.Criteria;
+import ai.turbochain.ipex.pagination.Restrictions;
 import ai.turbochain.ipex.service.Base.BaseService;
-import ai.turbochain.ipex.service.Base.TopBaseService;
-import ai.turbochain.ipex.util.PredicateUtils;
 import ai.turbochain.ipex.vo.MemberDepositVO;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class MemberDepositService extends BaseService<MemberDeposit> {
@@ -46,5 +48,14 @@ public class MemberDepositService extends BaseService<MemberDeposit> {
         List<MemberDepositVO> list = query.fetch() ;
         return new PageImpl<MemberDepositVO>(list,pageModel.getPageable(),total);
     }
+    
+	@Transactional(readOnly = true)
+	public Page<MemberDeposit> findAllByMemberId(Long memberId, int page, int pageSize) {
+		Sort orders = Criteria.sortStatic("id.desc");
+		PageRequest pageRequest = new PageRequest(page, pageSize, orders);
+		Criteria<MemberDeposit> specification = new Criteria<MemberDeposit>();
+		specification.add(Restrictions.eq("memberId", memberId, false));
+		return memberDepositDao.findAll(specification, pageRequest);
+	}
 
 }
