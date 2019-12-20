@@ -19,6 +19,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 
 import ai.turbochain.ipex.constant.CertifiedBusinessStatus;
 import ai.turbochain.ipex.constant.CommonStatus;
+import ai.turbochain.ipex.constant.MemberRegisterOriginEnum;
 import ai.turbochain.ipex.dao.MemberDao;
 import ai.turbochain.ipex.dao.MemberSignRecordDao;
 import ai.turbochain.ipex.dao.MemberTransactionDao;
@@ -89,7 +90,8 @@ public class MemberService extends BaseService {
     }
 
     public Member login(String username, String password) throws Exception {
-        Member member = memberDao.findMemberByMobilePhoneOrEmail(username, username);
+    	Integer origin = MemberRegisterOriginEnum.IPEX.getSourceType();
+        Member member = memberDao.findMemberByMobilePhoneAndOriginOrEmailAndOrigin(username, origin,username,origin);
         if (member == null) {
             throw new AuthenticationException("账号或密码错误");
         } else if (!Md5.md5Digest(password + member.getSalt()).toLowerCase().equals(member.getPassword())) {
@@ -149,28 +151,28 @@ public class MemberService extends BaseService {
     }
 
     public boolean emailIsExist(String email) {
-        List<Member> list = memberDao.getAllByEmailEquals(email);
+        List<Member> list = memberDao.getAllByOriginAndEmailEquals(MemberRegisterOriginEnum.IPEX.getSourceType(),email);
         return list.size() > 0 ? true : false;
     }
 
     public boolean usernameIsExist(String username) {
-        return memberDao.getAllByUsernameEquals(username).size() > 0 ? true : false;
+        return memberDao.getAllByOriginAndUsernameEquals(MemberRegisterOriginEnum.IPEX.getSourceType(),username).size() > 0 ? true : false;
     }
 
     public boolean phoneIsExist(String phone) {
-        return memberDao.getAllByMobilePhoneEquals(phone).size() > 0 ? true : false;
+        return memberDao.getAllByOriginAndMobilePhoneEquals(MemberRegisterOriginEnum.IPEX.getSourceType(),phone).size() > 0 ? true : false;
     }
 
     public Member findByUsername(String username) {
         return memberDao.findByUsername(username);
     }
 
-    public Member findByEmail(String email) {
-        return memberDao.findMemberByEmail(email);
+    public Member findByEmailAndOrigin(String email,Integer origin) {
+        return memberDao.findMemberByEmailAndOrigin(email, origin);
     }
 
-    public Member findByPhone(String phone) {
-        return memberDao.findMemberByMobilePhone(phone);
+    public Member findByPhoneAndOrigin(String phone,Integer origin) {
+        return memberDao.findMemberByMobilePhoneAndOrigin(phone, origin);
     }
 
     public Page<Member> findAll(Predicate predicate, Pageable pageable) {
@@ -215,8 +217,9 @@ public class MemberService extends BaseService {
     public boolean userPromotionCodeIsExist(String promotion) {
         return memberDao.getAllByPromotionCodeEquals(promotion).size() > 0 ? true : false;
     }
+  
     
-    public Member findMemberByMobilePhoneOrEmail(String phone, String email) {
-    	return memberDao.findMemberByMobilePhoneOrEmail(phone, email);
+    public Member findMemberByMobilePhoneAndOriginOrEmailAndOrigin(String phone,Integer origin1, String email,Integer origin2) {
+    	return memberDao.findMemberByMobilePhoneAndOriginOrEmailAndOrigin(phone,origin1, email,origin2);
     }
 }

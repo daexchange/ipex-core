@@ -15,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 public enum MemberRegisterOriginEnum implements BaseEnum{
+	IPEX(0),
     DELIVER(1),
     HARDID(2);
 

@@ -13,11 +13,11 @@ import java.util.List;
 
 public interface MemberDao extends BaseDao<Member> {
 
-    List<Member> getAllByEmailEquals(String email);
+    List<Member> getAllByOriginAndEmailEquals(Integer origin,String email);
 
-    List<Member> getAllByUsernameEquals(String username);
+    List<Member> getAllByOriginAndUsernameEquals(Integer origin,String username);
 
-    List<Member> getAllByMobilePhoneEquals(String phone);
+    List<Member> getAllByOriginAndMobilePhoneEquals(Integer origin,String phone);
 
     Member findByUsername(String username);
 
@@ -25,15 +25,15 @@ public interface MemberDao extends BaseDao<Member> {
 
     Member findMemberByToken(String token);
 
-    Member findMemberByMobilePhoneOrEmail(String phone, String email);
+    Member findMemberByMobilePhoneAndOriginOrEmailAndOrigin(String phone,Integer origin1, String email,Integer origin2);
 
     int countByRegistrationTimeBetween(Date startTime, Date endTime);
 
     Member findMemberByPromotionCode(String code);
 
-    Member findMemberByEmail(String email);
+    Member findMemberByEmailAndOrigin(String email,Integer origin);
 
-    Member findMemberByMobilePhone(String mobilePhone);
+    Member findMemberByMobilePhoneAndOrigin(String mobilePhone,Integer origin);
 
     List<Member> findAllByInviterId(Long id);
 
