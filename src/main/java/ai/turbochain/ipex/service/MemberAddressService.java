@@ -86,13 +86,9 @@ public class MemberAddressService extends BaseService {
 			return MessageResult.error(500, coinName + "不存在");
 		}
 		MemberAddress memberAddress = memberAddressDao.findByMemberIdAndCoinId(memberId, coin);
-		if (memberAddress != null) {
-			MessageResult messageResult = MessageResult.success();
-			messageResult.setData(memberAddress);
-			return messageResult;
-		} else {
-			return MessageResult.error("用户：" + memberId + "未保存" + coinName + "提币地址");
-		}
+		MessageResult messageResult = MessageResult.success();
+		messageResult.setData(memberAddress);
+		return messageResult;
 	}
 
 	public MessageResult deleteMemberAddress(Long memberId, Long addressId) {
