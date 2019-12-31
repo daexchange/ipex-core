@@ -162,6 +162,8 @@ public class Order {
     @NotBlank(message = "付费方式不能为空")
     private String payMode;
 
+    private Integer payType;
+    
     @NotNull
     private Long advertiseId;
 
