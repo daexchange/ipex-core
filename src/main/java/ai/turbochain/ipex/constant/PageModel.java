@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 public class PageModel {
-    Integer pageNo = 1;
+    Integer pageNo = 0;
     Integer pageSize = 10;
     List<Sort.Direction> direction;
     List<String> property;
