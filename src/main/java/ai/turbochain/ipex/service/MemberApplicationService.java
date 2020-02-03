@@ -152,10 +152,28 @@ public class MemberApplicationService extends BaseService {
 //        //添加用户BHBchange记录
 //        bhbChangeService.saveBhbChange(BigDecimal.valueOf(10000),memberId,"1","新用户赠送");
 
-
-
-
     }
+
+    /******************************************************************************************************************/
+
+    /**
+     * 获取会员实例
+     * @param memberId
+     */
+    public Member getMemberById(Long memberId){
+        Member member = memberDao.findOne(memberId);
+        return member;
+    }
+
+    /**
+     * 修改会员状态
+     * @param member
+     */
+    public void updateMemberAuthen(Member member){
+        memberDao.save(member);
+    }
+
+    /******************************************************************************************************************/
 
     private void promotion(Member member1, Member member) {
         RewardPromotionSetting rewardPromotionSetting = rewardPromotionSettingService.findByType(PromotionRewardType.REGISTER);
