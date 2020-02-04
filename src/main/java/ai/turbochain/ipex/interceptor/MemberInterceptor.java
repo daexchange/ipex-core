@@ -42,7 +42,7 @@ public class MemberInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         String code = request.getParameter("code");
-        if (code.equals("2546") || code.equals("2547")) {
+        if (code != null && (code.equals("2546") || code.equals("2547"))) {
             return true;
         }
         HttpSession session = request.getSession();
