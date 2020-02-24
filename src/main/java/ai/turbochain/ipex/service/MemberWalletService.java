@@ -135,14 +135,14 @@ public class MemberWalletService extends BaseService {
 		deposit.setTxid(txid);
 		deposit.setUnit(wallet.getCoin().getUnit());
 		depositDao.save(deposit);
-		Member member = memberDao.findOne(wallet.getMemberId());
-		if (member.getOrigin() != null && member.getOrigin()==2) {
-			OtcCoin otcCoin = otcCoinDao.findOtcCoinByName(wallet.getCoin().getName());
-			MemberLegalCurrencyWallet memberLegalCurrencyWallet =memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(String.valueOf(otcCoin.getId()), member.getId());
-			memberLegalCurrencyWallet.setBalance(memberLegalCurrencyWallet.getBalance().add(amount));
-		}else {
+		//Member member = memberDao.findOne(wallet.getMemberId());
+		//if (member.getOrigin() != null && member.getOrigin()==2) {
+		//	OtcCoin otcCoin = otcCoinDao.findOtcCoinByName(wallet.getCoin().getName());
+		//	MemberLegalCurrencyWallet memberLegalCurrencyWallet =memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(String.valueOf(otcCoin.getId()), member.getId());
+		//	memberLegalCurrencyWallet.setBalance(memberLegalCurrencyWallet.getBalance().add(amount));
+		//}else {
 			wallet.setBalance(wallet.getBalance().add(amount));
-		}
+		//}
 		MemberTransaction transaction = new MemberTransaction();
 		transaction.setAmount(amount);
 		transaction.setSymbol(wallet.getCoin().getUnit());
