@@ -132,12 +132,12 @@ public interface MemberLegalCurrencyWalletDao extends BaseDao<MemberLegalCurrenc
     List<MemberLegalCurrencyWallet> geteveryBHB(@Param("coinName")String coinName,@Param("weekDay")int weekDay);
 
     @Query(value = "select * from member_legal_currency_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
-    MemberLegalCurrencyWallet getMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
+    MemberLegalCurrencyWallet getByOtcCoinIdAndMemberId(@Param("coinId") Long coinId, @Param("memberId") long memberId);
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     //@Query(value = "select * from member_legal_currency_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
-    @Query(value = "select o from MemberLegalCurrencyWallet o where o.otcCoin.id= :coinId and o.memberId=:memberId ")
-    MemberLegalCurrencyWallet getLockMemberWalletByOtcCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
+    @Query(value = "select o from MemberLegalCurrencyWallet o where o.otcCoin.id= :otcCoinId and o.memberId=:memberId ")
+    MemberLegalCurrencyWallet getLockMemberWalletByOtcCoinIdAndMemberId(@Param("otcCoinId") Long otcCoinId, @Param("memberId") long memberId);
 
     @Transactional
     @Modifying

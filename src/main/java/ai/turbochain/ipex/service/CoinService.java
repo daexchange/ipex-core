@@ -76,6 +76,10 @@ public class CoinService extends BaseService {
         return coinDao.findByUnit(unit);
     }
 
+    public Coin findByName(String coinName){
+		return coinDao.findByName(coinName);
+	}
+    
     public Coin save(Coin coin) {
         return coinDao.save(coin);
     }

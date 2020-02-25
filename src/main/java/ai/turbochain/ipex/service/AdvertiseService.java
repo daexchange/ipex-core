@@ -625,4 +625,41 @@ public class AdvertiseService extends BaseService {
         }
         return special;
     }
+    
+    
+    /**
+     * 得到广告剩余数量，小于币种的最小买入交易的广告
+     *
+     * @return
+     */
+    public List<Map<String, String>> selectBuyAutoOffShelvesOnLimitAmount(Long coinId) throws SQLException, DataException {
+        String sql = "	SELECT\n" + 
+        		"		a.* \n" + 
+        		"		FROM\n" + 
+        		"			advertise a,otc_coin o \n" + 
+        		"		WHERE a.coin_id=o.id and a.coin_id= ? and \n" + 
+        		"			a.`status` = 0  and a.origin=2\n" + 
+        		"			AND a.advertise_type = 0 \n" + 
+        		"			and a.remain_amount < o.buy_min_amount ";
+        List<Map<String, String>> list = DB.query(sql,coinId);
+        return list;
+    }
+    
+    /**
+     * 得到广告剩余数量，小于币种的最小卖出买入交易的广告
+     *
+     * @return
+     */
+    public List<Map<String, String>> selectSellBuyAutoOffShelvesOnLimitAmount(Long coinId) throws SQLException, DataException {
+        String sql = "	SELECT\n" + 
+        		"		a.* \n" + 
+        		"		FROM\n" + 
+        		"			advertise a,otc_coin o \n" + 
+        		"		WHERE a.coin_id=o.id and a.coin_id= ? and \n" + 
+        		"			a.`status` = 0  and a.origin=2\n" + 
+        		"			AND a.advertise_type = 1 \n" + 
+        		"			and a.remain_amount < o.sell_min_amount ";
+        List<Map<String, String>> list = DB.query(sql,coinId);
+        return list;
+    }
 }

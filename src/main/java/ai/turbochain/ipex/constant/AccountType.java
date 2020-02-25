@@ -2,7 +2,7 @@ package ai.turbochain.ipex.constant;
 
 public enum AccountType {
 	
-	ExchangeAccount (1), LegalCurrencyAccount (2);
+	ExchangeAccount (1), LegalCurrencyAccount (2), LoanAccount (3);
 
     // 定义私有变量
     private int nCode ;

@@ -51,9 +51,9 @@ public class ExangeService extends BaseService {
     		Long memberIdFrom, Long memberIdTo) throws Exception { 
     		
     	// 悲观锁 将行数据锁定 select for udpate 所有update方法都需要加锁
-    	MemberWallet memberWalletFrom = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdFrom);
-    	MemberWallet memberWalletTo = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdTo);
-    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, system_member_id);
+    	MemberWallet memberWalletFrom = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, memberIdFrom);
+    	MemberWallet memberWalletTo = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, memberIdTo);
+    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, system_member_id);
     	
     	// 打款方币币账户扣减
         int result = memberWalletDao.transferDecreaseBalance(memberWalletFrom.getId(),memberIdFrom, amount,memberWalletFrom.getBalance());
@@ -116,8 +116,8 @@ public class ExangeService extends BaseService {
     		Long memberIdFrom, Long memberIdTo) throws Exception { 
     		
     	// 悲观锁 将行数据锁定 select for udpate 所有update方法都需要加锁
-    	MemberWallet memberWalletFrom = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdFrom);
-    	MemberWallet memberWalletTo = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberIdTo);
+    	MemberWallet memberWalletFrom = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, memberIdFrom);
+    	MemberWallet memberWalletTo = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, memberIdTo);
     	
     	// 打款方币币账户扣减
         int result = memberWalletDao.transferDecreaseBalance(memberWalletFrom.getId(),memberIdFrom, amount,memberWalletFrom.getBalance());
@@ -131,7 +131,7 @@ public class ExangeService extends BaseService {
         	if (result > 0) {
         		
         		if (fee.compareTo(BigDecimal.ZERO)==1) {
-        	    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, system_member_id);
+        	    	MemberWallet systemMemberWallet = memberWalletDao.getLockMemberWalletByCoinNameAndMemberId(coinId, system_member_id);
 
         			// 手续费划转到系统账户
                 	result = memberWalletDao.transferIncreaseBalance(systemMemberWallet.getId(), systemMemberWallet.getMemberId(), fee, systemMemberWallet.getBalance());

@@ -139,9 +139,14 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
     /**@Lock 作用的for update作用一样，将此行数据进行加锁，当整个方法将事务提交后，才会解锁*/
     @Lock(value = LockModeType.PESSIMISTIC_READ)
     //@Query(value = "select * from member_wallet where  coin_id=:coinId and member_id=:memberId ",nativeQuery =true)
-    @Query(value = "select o from MemberWallet o where o.coin.name= :coinId and o.memberId=:memberId ")
-    MemberWallet getLockMemberWalletByCoinAndMemberId(@Param("coinId") String coinId, @Param("memberId") long memberId);
+    @Query(value = "select o from MemberWallet o where o.coin.name= :coinName and o.memberId=:memberId ")
+    MemberWallet getLockMemberWalletByCoinNameAndMemberId(@Param("coinName") String coinName, @Param("memberId") long memberId);
 
+    /**@Lock 作用的for update作用一样，将此行数据进行加锁，当整个方法将事务提交后，才会解锁*/
+    @Lock(value = LockModeType.PESSIMISTIC_READ)
+    @Query(value = "select o from MemberWallet o where o.coin.unit= :coinUnit and o.memberId=:memberId ")
+    MemberWallet getLockMemberWalletByCoinUnitAndMemberId(@Param("coinUnit") String coinUnit, @Param("memberId") long memberId);
+    
     @Transactional
     @Modifying
     @Query(value="UPDATE member_wallet SET balance=balance+:teamBalance where coin_id = 'BHB' AND member_id=:teamId",nativeQuery = true)

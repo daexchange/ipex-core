@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import ai.turbochain.ipex.dao.CoinDao;
 import ai.turbochain.ipex.dao.MemberLegalCurrencyWalletDao;
 import ai.turbochain.ipex.dao.MemberWalletDao;
 import ai.turbochain.ipex.dao.OtcCoinDao;
@@ -34,6 +35,8 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
     private TransferSelfRecordService transferSelfRecordService;
     @Autowired
     private OtcCoinDao otcCoinDao;
+    @Autowired
+    private CoinDao coinDao;
 
     public MemberLegalCurrencyWallet save(MemberLegalCurrencyWallet bean) {
         return memberLegalCurrencyWalletDao.saveAndFlush(bean);
@@ -147,8 +150,8 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
      * @param memberId
      * @return
      */
-    public MemberLegalCurrencyWallet getMemberWalletByCoinAndMemberId(String coinId, long memberId) {
-        return memberLegalCurrencyWalletDao.getMemberWalletByCoinAndMemberId(coinId,memberId);
+    public MemberLegalCurrencyWallet getByOtcCoinIdAndMemberId(Long coinId, long memberId) {
+        return memberLegalCurrencyWalletDao.getByOtcCoinIdAndMemberId(coinId,memberId);
     }
  
     
@@ -161,15 +164,15 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
      * @throws Exception 
      */
     @Transactional(rollbackFor = Exception.class)
-    public MessageResult transferIncreaseBalance(String coinId, Long memberId, BigDecimal amount) throws Exception {
+    public MessageResult transferIncreaseBalance(String coinUnit,Long otcCoinId, Long memberId, BigDecimal amount) throws Exception {
 
-    	MemberWallet memberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberId);
+    	MemberWallet memberWallet = memberWalletDao.getLockMemberWalletByCoinUnitAndMemberId(coinUnit, memberId);
         
     	if (memberWallet.getBalance().compareTo(amount) < 0) {
             return new MessageResult(500, "可划转余额不足");
         }
     	
-		MemberLegalCurrencyWallet memberLegalCurrencyWallet =  memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinAndMemberId(coinId, memberId);
+		MemberLegalCurrencyWallet memberLegalCurrencyWallet =  memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinIdAndMemberId(otcCoinId, memberId);
 
     	if (memberLegalCurrencyWallet == null) {
             return new MessageResult(500, "wallet cannot be null");
@@ -183,9 +186,9 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
             if (result > 0) {
                  TransferSelfRecord transferSelfRecord = new TransferSelfRecord();
                  
-                 Coin coin = new Coin();
-         		coin.setName(coinId);
-         		transferSelfRecord.setCoin(coin);
+                 Coin coin = coinDao.findByUnit(coinUnit);
+         		 
+                 transferSelfRecord.setCoin(coin);
                  transferSelfRecord.setLegalcurrencyId(memberLegalCurrencyWallet.getId());
                  transferSelfRecord.setWalletId(memberWallet.getId());
                  transferSelfRecord.setMemberId(memberId);
@@ -217,15 +220,15 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
      * @throws Exception 
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public MessageResult transferDecreaseBalance(String coinId,Long memberId, BigDecimal amount) throws Exception {
+    public MessageResult transferDecreaseBalance(String coinUnit,Long otcCoinId, Long memberId, BigDecimal amount) throws Exception {
     	
-    	MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinAndMemberId(coinId, memberId);
+    	MemberLegalCurrencyWallet memberLegalCurrencyWallet = memberLegalCurrencyWalletDao.getLockMemberWalletByOtcCoinIdAndMemberId(otcCoinId, memberId);
     	
     	if (memberLegalCurrencyWallet.getBalance().compareTo(amount) < 0) {
             return new MessageResult(500, "可划转余额不足");
         }
     	
-    	MemberWallet memberWallet = memberWalletDao.getLockMemberWalletByCoinAndMemberId(coinId, memberId);
+    	MemberWallet memberWallet = memberWalletDao.getLockMemberWalletByCoinUnitAndMemberId(coinUnit, memberId);
 
     	// 法币账户扣减
         int result = memberLegalCurrencyWalletDao.transferDecreaseBalance(memberLegalCurrencyWallet.getId(), amount,memberLegalCurrencyWallet.getBalance());
@@ -238,8 +241,8 @@ public class MemberLegalCurrencyWalletService extends BaseService<MemberLegalCur
         	if (result > 0) {
         		TransferSelfRecord transferSelfRecord = new TransferSelfRecord();
                  
-        		 Coin coin = new Coin();
-        		 coin.setName(coinId);
+        		 Coin coin = coinDao.findByUnit(coinUnit);
+        		
         		 transferSelfRecord.setCoin(coin);
                  transferSelfRecord.setLegalcurrencyId(memberLegalCurrencyWallet.getId());
                  transferSelfRecord.setWalletId(memberWallet.getId());
