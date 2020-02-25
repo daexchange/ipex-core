@@ -176,7 +176,7 @@ public class WithdrawRecordService extends BaseService {
 			Member member = memberService.findOne(memberId);
 			record.setTransactionNumber(txid);
 			record.setStatus(WithdrawStatus.SUCCESS);
-			if (member.getOrigin() == 2) {
+			/*if (member.getOrigin() == 2) {
 				MemberLegalCurrencyWallet wallet = memberLegalCurrencyWalletService
 						.findByOtcCoinUnitAndMemberId(record.getCoin().getUnit(), memberId);
 				if (wallet != null) {
@@ -193,7 +193,7 @@ public class WithdrawRecordService extends BaseService {
 					transaction.setCreateTime(new Date());
 					transaction = transactionService.save(transaction);
 				}
-			} else {
+			} else {*/
 				MemberWallet wallet = walletService.findByCoinUnitAndMemberId(record.getCoin().getUnit(),
 						record.getMemberId());
 				if (wallet != null) {
@@ -211,7 +211,7 @@ public class WithdrawRecordService extends BaseService {
 					transaction = transactionService.save(transaction);
 
 				}
-			}
+			//}
 		}
 	}
 
