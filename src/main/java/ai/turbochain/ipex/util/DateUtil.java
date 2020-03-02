@@ -158,6 +158,24 @@ public class DateUtil {
 		days = (end - start) / 86400000L;
 		return days;
 	}
+	
+	
+	/**
+	 * 两个日期相隔天数
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public static long DaysApart(Date startDate, Date endDate) {
+		long days = 0L;
+		long start = startDate.getTime();
+		long end = endDate.getTime();
+		days = (end - start) / 86400000L;
+		if((end-start)%86400000L!=0) {
+			days = days +1;
+		}
+		return days;
+	}
 
 	public static Date dateAddMonth(Date date, int month) {
 		return add(date, 2, month);
