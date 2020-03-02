@@ -166,7 +166,7 @@ public class DateUtil {
 	 * @param endDate
 	 * @return
 	 */
-	public static long DaysApart(Date startDate, Date endDate) {
+	public static long daysApart(Date startDate, Date endDate) {
 		long days = 0L;
 		long start = startDate.getTime();
 		long end = endDate.getTime();
