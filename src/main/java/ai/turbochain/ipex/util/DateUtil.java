@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -480,52 +482,50 @@ public class DateUtil {
 		System.out.println("上个月最后一天：" + DateUtil.dateToString(calendar.getTime()));
 		return calendar.getTimeInMillis();
 	}
- 
+
 	// 5、获取上个周的第一天
 	public static long getBeforeFirstWeekDate() {
 		Calendar calendar = Calendar.getInstance();
-		
+
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
-	    calendar.set(Calendar.MINUTE, 0);
-	    calendar.set(Calendar.SECOND, 0);
-	    calendar.set(Calendar.MILLISECOND, 0);
-	 
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+
 		int dayofweek = calendar.get(Calendar.DAY_OF_WEEK);
 		if (dayofweek == 1) {
 			dayofweek += 7;
 		}
 		calendar.add(Calendar.DATE, 2 - dayofweek - 7);
-		
+
 		System.out.println("上周第一天：" + DateUtil.dateToString(calendar.getTime()));
-		
-		return calendar.getTimeInMillis();	
+
+		return calendar.getTimeInMillis();
 	}
 
-	 // 获取本周的开始时间
-    public static long getBeginDayOfWeek() {
-       
-        Calendar calendar = Calendar.getInstance();
-        
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        
-        int dayofweek = calendar.get(Calendar.DAY_OF_WEEK);
-       
-        if (dayofweek == 1) {
-            dayofweek += 7;
-        }
-        calendar.add(Calendar.DATE, 2 - dayofweek);
-        
-        System.out.println("本周第一天：" + DateUtil.dateToString(calendar.getTime()));
-		
-		return calendar.getTimeInMillis();	
-    }
- 
-    
-    
-    public static long getYestDayBeginTime() {
+	// 获取本周的开始时间
+	public static long getBeginDayOfWeek() {
+
+		Calendar calendar = Calendar.getInstance();
+
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+
+		int dayofweek = calendar.get(Calendar.DAY_OF_WEEK);
+
+		if (dayofweek == 1) {
+			dayofweek += 7;
+		}
+		calendar.add(Calendar.DATE, 2 - dayofweek);
+
+		System.out.println("本周第一天：" + DateUtil.dateToString(calendar.getTime()));
+
+		return calendar.getTimeInMillis();
+	}
+
+	public static long getYestDayBeginTime() {
 		Calendar calendar = Calendar.getInstance();
 
 		// 将秒、微秒字段置为0
@@ -534,47 +534,61 @@ public class DateUtil {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 
-		calendar.add(Calendar.DATE,   -1);
-	 
-		System.out.println("昨天开始时间为：" +DateUtil.dateToString(calendar.getTime()));
+		calendar.add(Calendar.DATE, -1);
+
+		System.out.println("昨天开始时间为：" + DateUtil.dateToString(calendar.getTime()));
 
 		return calendar.getTimeInMillis();
 	}
-    
-    public static long getTodayBeginTime() {
-  		Calendar calendar = Calendar.getInstance();
 
-  		// 将秒、微秒字段置为0
-  		calendar.set(Calendar.HOUR_OF_DAY, 0);
-  		calendar.set(Calendar.MINUTE, 0);
-  		calendar.set(Calendar.SECOND, 0);
-  		calendar.set(Calendar.MILLISECOND, 0);
+	public static long getTodayBeginTime() {
+		Calendar calendar = Calendar.getInstance();
 
-  		System.out.println("今天开始时间为：" +DateUtil.dateToString(calendar.getTime()));
+		// 将秒、微秒字段置为0
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
 
-  		return calendar.getTimeInMillis();
-  	}
-    
-    
+		System.out.println("今天开始时间为：" + DateUtil.dateToString(calendar.getTime()));
+
+		return calendar.getTimeInMillis();
+	}
+
+	/**
+	 * LocalDateTime转换为Date
+	 * 
+	 * @param localDateTime
+	 */
+	public static Date localDateTime2Date(LocalDateTime localDateTime) {
+		ZoneId zoneId = ZoneId.systemDefault();
+		ZonedDateTime zdt = localDateTime.atZone(zoneId);// Combines this date-time with a time-zone to create a //
+															// ZonedDateTime.
+		Date date = Date.from(zdt.toInstant());
+		return date;
+		// System.out.println(date.toString());// Tue Mar 27 14:17:17 CST 2018
+	}
+
 	public static void main(String[] args) {
 		long startTick = 0;
 		long endTick = 0;
 		try {
-			//startTick = getYestDayBeginTime();
-			//endTick = getTodayBeginTime();
+			// startTick = getYestDayBeginTime();
+			// endTick = getTodayBeginTime();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		long from = 1413078466000l;
 		long to = 1568598466563l;
-		
-		//Calendar calendar = Calendar.getInstance();
-		long s= getFirstDateOfMonth();
+
+		// Calendar calendar = Calendar.getInstance();
+		long s = getFirstDateOfMonth();
 		System.out.println(s);
-		 Calendar calendar = Calendar.getInstance();
-		 System.out.println(calendar.getTimeInMillis());
-		//System.out.println(DateUtil.dateToString(calendar.getTime()));
-		//System.out.println(DateUtil.dateToString(new Date(from)) + "========" + DateUtil.dateToString(new Date(to)));
-		//System.out.println(startTick + "========" + endTick);
+		Calendar calendar = Calendar.getInstance();
+		System.out.println(calendar.getTimeInMillis());
+		// System.out.println(DateUtil.dateToString(calendar.getTime()));
+		// System.out.println(DateUtil.dateToString(new Date(from)) + "========" +
+		// DateUtil.dateToString(new Date(to)));
+		// System.out.println(startTick + "========" + endTick);
 	}
 }
