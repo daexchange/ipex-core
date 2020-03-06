@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -585,6 +586,22 @@ public class DateUtil {
 		Date date = Date.from(zdt.toInstant());
 		return date;
 		// System.out.println(date.toString());// Tue Mar 27 14:17:17 CST 2018
+	}
+	
+	/**
+	 * 两个日期相隔天数
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public static long daysApartOfLocalDateTime(LocalDateTime startDate, LocalDateTime endDate) {
+		long days = 0L;
+		Duration duration  = Duration.between(startDate,  endDate);
+		days = duration.toMillis() / 86400000L;
+		if(duration.toMillis()%86400000L!=0) {
+			days = days +1;
+		}
+		return days;
 	}
 
 	public static void main(String[] args) {
