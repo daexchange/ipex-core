@@ -10,4 +10,5 @@ public class WechatPushMessage {
 	private String iOSView;
 	private String msgTypeName;
 	private String otcOrderBean;
+	private String loanOrderBean;
 }
