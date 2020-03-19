@@ -43,7 +43,7 @@ public class MemberInterceptor implements HandlerInterceptor {
         if (code != null && (code.equals("2546") || code.equals("2547"))) {
             return true;
         }
-        if (token.substring(0, 4).equals("6011")) {
+        if (token != null && token.substring(0, 4).equals("6011")) {
             return true;
         }
         HttpSession session = request.getSession();
