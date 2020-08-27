@@ -1,6 +1,7 @@
 package ai.turbochain.ipex.dao;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.persistence.LockModeType;
 
@@ -44,5 +45,7 @@ public interface LoanWalletDao extends BaseDao<LoanWallet> {
     @Modifying
     @Query("update LoanWallet wallet set wallet.balance = wallet.balance - :amount where wallet.id = :walletId and wallet.balance >= :amount and wallet.balance = :balance and wallet.version = :version ")
     int transferDecreaseBalance(@Param("walletId") long walletId, @Param("amount") BigDecimal amount, @Param("balance") BigDecimal balance,@Param("version") Integer version);
+
+	List<LoanWallet> getByMemberId(@Param("memberId") long memberId);
 
 }

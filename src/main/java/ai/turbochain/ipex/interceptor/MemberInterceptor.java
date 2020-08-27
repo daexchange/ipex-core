@@ -1,11 +1,13 @@
 package ai.turbochain.ipex.interceptor;
 
 
-import ai.turbochain.ipex.constant.SysConstant;
-import ai.turbochain.ipex.entity.Member;
-import ai.turbochain.ipex.entity.transform.AuthMember;
-import com.osp.blockchain.bean.User;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,11 +17,14 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.alibaba.fastjson.JSON;
+import com.osp.blockchain.bean.User;
+
+import ai.turbochain.ipex.constant.SysConstant;
+import ai.turbochain.ipex.entity.Member;
+import ai.turbochain.ipex.entity.transform.AuthMember;
+import ai.turbochain.ipex.service.MemberService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 用户验证拦截器
@@ -28,10 +33,12 @@ import java.io.PrintWriter;
  */
 @Slf4j
 public class MemberInterceptor implements HandlerInterceptor {
-
+	public static final Integer origin_ART = 2;
     @Autowired
     private RedisTemplate redisTemplate;
-
+    @Autowired
+	private MemberService memberService;
+    
     /**
      * 处理Session问题
      */
@@ -55,8 +62,42 @@ public class MemberInterceptor implements HandlerInterceptor {
 //        if (user != null || webUser != null) {
 
         String accessToken = request.getHeader("access_token");
-        //   accessToken = "11.7d56b01dad0fb063ec15263e5f5395ea30f0f266.3600.1576157526";
+       
+        String clientId = request.getHeader("clientId");
 
+        if ("6".equals(clientId)) {
+        	Integer origin = origin_ART;
+        	
+        	if (StringUtils.isNotBlank(accessToken)) {
+                log.info("accessToken:{}", accessToken);
+               
+                ValueOperations valueOperations = redisTemplate.opsForValue();
+                
+                String accessUser =	(String) valueOperations.get(accessToken);
+
+                if (StringUtils.isNotBlank(accessUser)) {
+                	com.alibaba.fastjson.JSONObject jSONUser = JSON.parseObject(accessUser);
+                	
+                	String mobilePhone = jSONUser.getString("mobile");
+                	
+                	Member member = memberService.findByPhoneAndOrigin(mobilePhone, origin);
+
+                    if (member != null) {
+                        
+                    	request.getSession().setAttribute(SysConstant.API_HARD_ID_MEMBER, AuthMember.toAuthMember(member));
+                       
+                        return true;
+                    } else {
+                    	 ajaxReturn(response, 4000, "该手机号尚未注册！");
+                         return false;
+                    }
+                }
+        	}
+        	
+        	 ajaxReturn(response, 4000, "当前登录状态过期，请您重新登录！");
+             return false;
+        }
+        
         if (user != null) {
             return true;
         } else if (StringUtils.isNotBlank(accessToken)) {
@@ -70,11 +111,14 @@ public class MemberInterceptor implements HandlerInterceptor {
             User hardIdUser = (User) valueOperations.get(accessToken);
 
             if (hardIdUser != null) {
-                Long memberId = hardIdUser.getIpexId();
+                
+            	Long memberId = hardIdUser.getIpexId();
+               
                 if (memberId != null) {
                     Member member = new Member();
 
                     member.setId(memberId);
+                    
                     request.getSession().setAttribute(SysConstant.API_HARD_ID_MEMBER, AuthMember.toAuthMember(member));
 
                     return true;

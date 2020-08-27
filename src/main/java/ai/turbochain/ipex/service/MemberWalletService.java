@@ -170,6 +170,10 @@ public class MemberWalletService extends BaseService {
 		return memberWalletDao.findByCoinAndAddress(coin, address);
 	}
 
+	public MemberWallet findByAddress(String address) {
+		return memberWalletDao.findByAddress(address);
+	}
+	
 	/**
 	 * 根据币种和用户ID获取钱包
 	 *

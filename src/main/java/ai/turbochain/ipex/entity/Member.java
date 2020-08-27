@@ -214,4 +214,6 @@ public class Member {
     private Integer origin;
     
     private String nickName;
+    
+    private String clientId;
 }

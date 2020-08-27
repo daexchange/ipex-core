@@ -159,4 +159,7 @@ public class Coin {
     @Column(columnDefinition = "int default 4 comment '币单位'")
     private int decimals;
    
+   // @Transient
+    @Column(columnDefinition = "decimal(18,8) default 0 comment '代币发行量'")
+    private BigDecimal tokenAmount;
 }

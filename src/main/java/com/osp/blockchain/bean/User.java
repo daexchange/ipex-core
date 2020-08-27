@@ -27,7 +27,8 @@ public class User {
 	private String imPassword;
 	private String password;
 	private Long ipexId;
-
+	private Integer appId;
+	
 	public User() {
 		super();
 	}
@@ -183,5 +184,13 @@ public class User {
 
 	public void setFacebook(String facebook) {
 		this.facebook = facebook;
+	}
+
+	public Integer getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Integer appId) {
+		this.appId = appId;
 	}
 }

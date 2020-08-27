@@ -72,9 +72,10 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
     @Query("update MemberWallet wallet set wallet.frozenBalance=wallet.frozenBalance - :amount where wallet.id = :walletId and wallet.frozenBalance >= :amount")
     int decreaseFrozen(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
 
-
     MemberWallet findByCoinAndAddress(Coin coin, String address);
 
+    MemberWallet findByAddress(String address);
+    
     MemberWallet findByCoinAndMemberId(Coin coin, Long memberId);
 
     List<MemberWallet> findAllByMemberId(Long memberId);
